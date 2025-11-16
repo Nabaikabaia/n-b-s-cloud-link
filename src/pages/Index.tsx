@@ -4,46 +4,65 @@ import UploadZone from '@/components/UploadZone';
 import UploadProgress from '@/components/UploadProgress';
 import URLCard from '@/components/URLCard';
 import ExpirationSelector from '@/components/ExpirationSelector';
+import ThemeToggle from '@/components/ThemeToggle';
+import FilePreview from '@/components/FilePreview';
+import UploadHistory from '@/components/UploadHistory';
 import { Button } from '@/components/ui/button';
-import { Zap, Shield } from 'lucide-react';
+import { Zap, Shield, History } from 'lucide-react';
 import crystalOrb from '@/assets/crystal-orb.png';
+import { useUploads } from '@/hooks/useUploads';
 
 const Index = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [filePreviewUrl, setFilePreviewUrl] = useState<string>('');
   const [isUploading, setIsUploading] = useState(false);
-  const [generatedURL, setGeneratedURL] = useState<string>('');
+  const [currentUpload, setCurrentUpload] = useState<any>(null);
   const [expiration, setExpiration] = useState('24h');
+  const [showHistory, setShowHistory] = useState(false);
+  
+  const { uploads, uploadFile, deleteUpload, getPublicUrl, isLoading } = useUploads();
 
   const handleFileSelect = (file: File) => {
     setSelectedFile(file);
-    setGeneratedURL('');
+    setCurrentUpload(null);
+    
+    // Generate preview for images
+    if (file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFilePreviewUrl(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setFilePreviewUrl('');
+    }
   };
 
   const handleUpload = async () => {
     if (!selectedFile) return;
 
     setIsUploading(true);
-
-    // Simulate upload with progress
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    // Generate mock short URL
-    const shortId = Math.random().toString(36).substring(2, 8).toUpperCase();
-    const mockURL = `https://nabees.io/${shortId}`;
-    
-    setGeneratedURL(mockURL);
-    setIsUploading(false);
+    try {
+      const upload = await uploadFile(selectedFile, expiration);
+      setCurrentUpload(upload);
+    } catch (error) {
+      console.error('Upload failed:', error);
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleReset = () => {
     setSelectedFile(null);
-    setGeneratedURL('');
+    setCurrentUpload(null);
     setIsUploading(false);
+    setFilePreviewUrl('');
   };
 
   return (
     <div className="min-h-screen relative overflow-hidden">
       <ParticleBackground />
+      <ThemeToggle />
 
       {/* Main content */}
       <div className="relative z-10 container mx-auto px-4 py-12">
@@ -65,7 +84,7 @@ const Index = () => {
             Your File, One Link, Zero Stress
           </p>
           
-          <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground">
+          <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground flex-wrap">
             <div className="flex items-center gap-2">
               <Zap className="w-4 h-4 text-primary" />
               <span>Instant Upload</span>
@@ -74,27 +93,34 @@ const Index = () => {
               <Shield className="w-4 h-4 text-success" />
               <span>Secure Cloud</span>
             </div>
+            {uploads.length > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowHistory(!showHistory)}
+                className="text-muted-foreground hover:text-primary"
+              >
+                <History className="w-4 h-4 mr-2" />
+                History ({uploads.length})
+              </Button>
+            )}
           </div>
         </header>
 
         {/* Main upload area */}
         <div className="max-w-4xl mx-auto space-y-8">
-          {!selectedFile && !generatedURL && (
+          {!selectedFile && !currentUpload && (
             <UploadZone onFileSelect={handleFileSelect} isUploading={false} />
           )}
 
-          {selectedFile && !isUploading && !generatedURL && (
+          {selectedFile && !isUploading && !currentUpload && (
             <div className="space-y-6">
-              <div className="glass-strong rounded-2xl p-6 border border-primary/30">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Selected file</p>
-                    <p className="text-lg font-semibold">{selectedFile.name}</p>
-                  </div>
-                  <Button variant="ghost" onClick={handleReset}>
-                    Change
-                  </Button>
-                </div>
+              <FilePreview file={selectedFile} previewUrl={filePreviewUrl} />
+
+              <div className="flex items-center justify-end">
+                <Button variant="ghost" onClick={handleReset} size="sm">
+                  Change File
+                </Button>
               </div>
 
               <ExpirationSelector selected={expiration} onChange={setExpiration} />
@@ -114,9 +140,12 @@ const Index = () => {
             <UploadProgress fileName={selectedFile.name} fileSize={selectedFile.size} />
           )}
 
-          {generatedURL && selectedFile && (
+          {currentUpload && (
             <div className="space-y-6">
-              <URLCard url={generatedURL} fileName={selectedFile.name} />
+              <URLCard 
+                url={getPublicUrl(currentUpload.short_id)} 
+                fileName={currentUpload.file_name} 
+              />
               
               <Button
                 onClick={handleReset}
@@ -126,6 +155,14 @@ const Index = () => {
                 Upload Another File
               </Button>
             </div>
+          )}
+
+          {showHistory && uploads.length > 0 && (
+            <UploadHistory 
+              uploads={uploads}
+              onDelete={deleteUpload}
+              getPublicUrl={getPublicUrl}
+            />
           )}
         </div>
 
