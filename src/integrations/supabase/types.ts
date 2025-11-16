@@ -14,13 +14,49 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      uploads: {
+        Row: {
+          created_at: string
+          download_count: number | null
+          expire_at: string | null
+          file_name: string
+          file_size: number
+          file_type: string
+          id: string
+          short_id: string
+          storage_path: string
+        }
+        Insert: {
+          created_at?: string
+          download_count?: number | null
+          expire_at?: string | null
+          file_name: string
+          file_size: number
+          file_type: string
+          id?: string
+          short_id: string
+          storage_path: string
+        }
+        Update: {
+          created_at?: string
+          download_count?: number | null
+          expire_at?: string | null
+          file_name?: string
+          file_size?: number
+          file_type?: string
+          id?: string
+          short_id?: string
+          storage_path?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      delete_expired_uploads: { Args: never; Returns: undefined }
+      generate_short_id: { Args: never; Returns: string }
     }
     Enums: {
       [_ in never]: never
