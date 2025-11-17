@@ -93,7 +93,12 @@ const UploadHistory = ({ uploads, onDelete, getPublicUrl }: UploadHistoryProps) 
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold truncate">{upload.file_name}</p>
+                  {upload.custom_name && (
+                    <p className="text-sm font-bold text-primary truncate">{upload.custom_name}</p>
+                  )}
+                  <p className={`${upload.custom_name ? 'text-sm text-muted-foreground' : 'font-semibold'} truncate`}>
+                    {upload.file_name}
+                  </p>
                   <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground flex-wrap">
                     <span>{formatFileSize(upload.file_size)}</span>
                     <span>•</span>

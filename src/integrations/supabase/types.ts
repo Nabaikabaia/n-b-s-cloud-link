@@ -17,6 +17,7 @@ export type Database = {
       uploads: {
         Row: {
           created_at: string
+          custom_name: string | null
           download_count: number | null
           expire_at: string | null
           file_name: string
@@ -28,6 +29,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          custom_name?: string | null
           download_count?: number | null
           expire_at?: string | null
           file_name: string
@@ -39,6 +41,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          custom_name?: string | null
           download_count?: number | null
           expire_at?: string | null
           file_name?: string
