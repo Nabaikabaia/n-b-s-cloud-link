@@ -44,7 +44,9 @@ const ParticleBackground = () => {
     }
 
     const animate = () => {
-      ctx.fillStyle = 'rgba(17, 24, 39, 0.1)';
+      // Check if dark mode is active
+      const isDark = document.documentElement.classList.contains('dark');
+      ctx.fillStyle = isDark ? 'rgba(17, 24, 39, 0.1)' : 'rgba(249, 250, 251, 0.1)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       particles.forEach((particle) => {
@@ -95,11 +97,14 @@ const ParticleBackground = () => {
   }, []);
 
   return (
-    <canvas
-      ref={canvasRef}
-      className="fixed inset-0 z-0 pointer-events-none"
-      style={{ background: 'transparent' }}
-    />
+    <div className="fixed inset-0 z-0 pointer-events-none">
+      <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-primary/5 dark:to-primary/10" />
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0"
+        style={{ background: 'transparent' }}
+      />
+    </div>
   );
 };
 

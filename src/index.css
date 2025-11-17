@@ -8,6 +8,63 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
+    /* Light Mode - Clean & Modern */
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
+
+    /* Light Cards */
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    /* Vibrant Cyan Primary */
+    --primary: 190 95% 45%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Purple Secondary */
+    --secondary: 271 76% 53%;
+    --secondary-foreground: 0 0% 100%;
+
+    /* Light Muted */
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+
+    /* Pink Accent */
+    --accent: 330 81% 60%;
+    --accent-foreground: 0 0% 100%;
+
+    /* Success Green */
+    --success: 158 64% 52%;
+    --success-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Light Borders */
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 190 95% 45%;
+
+    --radius: 1rem;
+
+    /* Gradient Auras */
+    --gradient-cyber: linear-gradient(135deg, hsl(190 95% 45%) 0%, hsl(271 76% 53%) 100%);
+    --gradient-quantum: linear-gradient(135deg, hsl(271 76% 53%) 0%, hsl(330 81% 60%) 100%);
+    --gradient-emerald: linear-gradient(135deg, hsl(158 64% 52%) 0%, hsl(190 95% 45%) 100%);
+    --gradient-holographic: linear-gradient(135deg, hsl(190 95% 45%) 0%, hsl(271 76% 53%) 50%, hsl(330 81% 60%) 100%);
+    
+    /* Light Glow Effects */
+    --glow-cyan: 0 0 20px hsla(190 95% 45% / 0.3), 0 0 40px hsla(190 95% 45% / 0.2);
+    --glow-purple: 0 0 20px hsla(271 76% 53% / 0.3), 0 0 40px hsla(271 76% 53% / 0.2);
+    --glow-pink: 0 0 20px hsla(330 81% 60% / 0.3), 0 0 40px hsla(330 81% 60% / 0.2);
+    
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .dark {
     /* Futuristic Dark Theme - Space Navy Base */
     --background: 222 47% 6%;
     --foreground: 210 40% 98%;
@@ -47,8 +104,6 @@ All colors MUST be HSL.
     --input: 222 40% 15%;
     --ring: 190 100% 50%;
 
-    --radius: 1rem;
-
     /* Gradient Auras */
     --gradient-cyber: linear-gradient(135deg, hsl(190 100% 50%) 0%, hsl(271 81% 56%) 100%);
     --gradient-quantum: linear-gradient(135deg, hsl(271 81% 56%) 0%, hsl(330 81% 60%) 100%);
@@ -59,9 +114,6 @@ All colors MUST be HSL.
     --glow-cyan: 0 0 20px hsla(190 100% 50% / 0.5), 0 0 40px hsla(190 100% 50% / 0.3);
     --glow-purple: 0 0 20px hsla(271 81% 56% / 0.5), 0 0 40px hsla(271 81% 56% / 0.3);
     --glow-pink: 0 0 20px hsla(330 81% 60% / 0.5), 0 0 40px hsla(330 81% 60% / 0.3);
-    
-    /* Animations */
-    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
@@ -107,28 +159,59 @@ All colors MUST be HSL.
     animation: gradient-shift 3s ease infinite;
   }
 
-  /* Glassmorphism */
+  /* Glassmorphism - Light Mode */
   .glass {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7));
     backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   }
   
   .glass-strong {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.85));
+    backdrop-filter: blur(30px);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Glassmorphism - Dark Mode */
+  .dark .glass {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: none;
+  }
+  
+  .dark .glass-strong {
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.08));
     backdrop-filter: blur(30px);
     border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: none;
   }
 
-  /* Neuphemism */
+  /* Neuphemism - Light Mode */
   .neu-flat {
+    background: hsl(var(--card));
+    box-shadow: 
+      8px 8px 16px rgba(0, 0, 0, 0.1),
+      -8px -8px 16px rgba(255, 255, 255, 0.9);
+  }
+  
+  .neu-pressed {
+    box-shadow: 
+      inset 4px 4px 8px rgba(0, 0, 0, 0.1),
+      inset -4px -4px 8px rgba(255, 255, 255, 0.9);
+  }
+
+  /* Neuphemism - Dark Mode */
+  .dark .neu-flat {
     background: hsl(var(--card));
     box-shadow: 
       8px 8px 16px rgba(0, 0, 0, 0.4),
       -8px -8px 16px rgba(255, 255, 255, 0.05);
   }
   
-  .neu-pressed {
+  .dark .neu-pressed {
     box-shadow: 
       inset 4px 4px 8px rgba(0, 0, 0, 0.5),
       inset -4px -4px 8px rgba(255, 255, 255, 0.05);
