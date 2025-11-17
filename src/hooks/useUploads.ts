@@ -12,6 +12,7 @@ export interface Upload {
   expire_at: string | null;
   created_at: string;
   download_count: number;
+  custom_name: string | null;
 }
 
 export const useUploads = () => {
@@ -35,7 +36,7 @@ export const useUploads = () => {
     setIsLoading(false);
   };
 
-  const uploadFile = async (file: File, expiration: string) => {
+  const uploadFile = async (file: File, expiration: string, customName?: string) => {
     try {
       setIsLoading(true);
 
@@ -83,6 +84,7 @@ export const useUploads = () => {
           file_type: file.type,
           storage_path: storagePath,
           expire_at: expireAt,
+          custom_name: customName || null,
         })
         .select()
         .single();

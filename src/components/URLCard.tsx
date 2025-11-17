@@ -6,9 +6,10 @@ import { useToast } from '@/hooks/use-toast';
 interface URLCardProps {
   url: string;
   fileName: string;
+  customName?: string | null;
 }
 
-const URLCard = ({ url, fileName }: URLCardProps) => {
+const URLCard = ({ url, fileName, customName }: URLCardProps) => {
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
 
@@ -39,7 +40,15 @@ const URLCard = ({ url, fileName }: URLCardProps) => {
         </div>
 
         <div className="space-y-3">
-          <p className="text-sm text-muted-foreground text-center">File: {fileName}</p>
+          {customName && (
+            <div className="text-center">
+              <p className="text-lg font-bold text-primary mb-1">{customName}</p>
+              <p className="text-sm text-muted-foreground">({fileName})</p>
+            </div>
+          )}
+          {!customName && (
+            <p className="text-sm text-muted-foreground text-center">File: {fileName}</p>
+          )}
           
           <div className="glass rounded-xl p-4 border border-primary/50 glow-cyan">
             <div className="flex items-center justify-between gap-3">

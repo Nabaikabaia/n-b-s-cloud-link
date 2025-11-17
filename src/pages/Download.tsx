@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Download as DownloadIcon, AlertCircle, Sparkles } from 'lucide-react';
+import { Download as DownloadIcon, AlertCircle, Sparkles, FileDown } from 'lucide-react';
 import ParticleBackground from '@/components/ParticleBackground';
 import ThemeToggle from '@/components/ThemeToggle';
 import crystalOrb from '@/assets/crystal-orb.png';
@@ -55,26 +55,33 @@ const Download = () => {
 
     setDownloading(true);
     try {
-      // Get public URL
-      const { data: urlData } = supabase.storage
+      // Get the public URL
+      const { data } = supabase.storage
         .from('uploads')
         .getPublicUrl(upload.storage_path);
 
       // Increment download count
       await supabase
         .from('uploads')
-        .update({ download_count: upload.download_count + 1 })
+        .update({ download_count: (upload.download_count || 0) + 1 })
         .eq('id', upload.id);
 
-      // Trigger download
+      // Fetch the file and force download
+      const response = await fetch(data.publicUrl);
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      
       const link = document.createElement('a');
-      link.href = urlData.publicUrl;
-      link.download = upload.file_name;
+      link.href = blobUrl;
+      link.download = upload.custom_name || upload.file_name;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-    } catch (err) {
-      console.error('Download error:', err);
+      window.URL.revokeObjectURL(blobUrl);
+
+      setUpload({ ...upload, download_count: (upload.download_count || 0) + 1 });
+    } catch (error) {
+      console.error('Download error:', error);
     } finally {
       setDownloading(false);
     }
@@ -133,7 +140,14 @@ const Download = () => {
                 <Sparkles className="w-5 h-5 text-accent animate-pulse" />
               </div>
 
-              <div className="glass rounded-xl p-6 space-y-3">
+              <div className="glass rounded-xl p-6 space-y-4">
+                {upload.custom_name && (
+                  <div className="pb-4 border-b border-border/30">
+                    <p className="text-sm text-muted-foreground mb-1">Custom Name</p>
+                    <p className="text-2xl font-bold text-primary animate-gradient bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent">{upload.custom_name}</p>
+                  </div>
+                )}
+                
                 <div>
                   <p className="text-sm text-muted-foreground">File Name</p>
                   <p className="text-lg font-semibold">{upload.file_name}</p>
@@ -166,11 +180,20 @@ const Download = () => {
               <Button
                 onClick={handleDownload}
                 disabled={downloading}
-                className="w-full py-6 text-lg glass-strong border-2 border-primary hover:glow-cyan group relative overflow-hidden"
+                className="w-full py-6 text-lg glass-strong border-2 border-success hover:glow-cyan group relative overflow-hidden"
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-secondary/20 to-accent/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
-                <DownloadIcon className="w-5 h-5 mr-2" />
-                {downloading ? 'Downloading...' : 'Download File'}
+                <div className="absolute inset-0 bg-gradient-to-r from-success/20 via-primary/20 to-accent/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+                {downloading ? (
+                  <>
+                    <div className="animate-spin w-5 h-5 border-2 border-foreground border-t-transparent rounded-full mr-2" />
+                    Downloading...
+                  </>
+                ) : (
+                  <>
+                    <DownloadIcon className="w-5 h-5 mr-2" />
+                    Download File
+                  </>
+                )}
               </Button>
 
               <Button

@@ -8,7 +8,7 @@ import ThemeToggle from '@/components/ThemeToggle';
 import FilePreview from '@/components/FilePreview';
 import UploadHistory from '@/components/UploadHistory';
 import { Button } from '@/components/ui/button';
-import { Zap, Shield, History } from 'lucide-react';
+import { Zap, Shield, History, Upload as UploadIcon, Sparkles, Check } from 'lucide-react';
 import crystalOrb from '@/assets/crystal-orb.png';
 import { useUploads } from '@/hooks/useUploads';
 
@@ -19,6 +19,7 @@ const Index = () => {
   const [currentUpload, setCurrentUpload] = useState<any>(null);
   const [expiration, setExpiration] = useState('24h');
   const [showHistory, setShowHistory] = useState(false);
+  const [customName, setCustomName] = useState('');
   
   const { uploads, uploadFile, deleteUpload, getPublicUrl, isLoading } = useUploads();
 
@@ -43,7 +44,7 @@ const Index = () => {
 
     setIsUploading(true);
     try {
-      const upload = await uploadFile(selectedFile, expiration);
+      const upload = await uploadFile(selectedFile, expiration, customName.trim() || undefined);
       setCurrentUpload(upload);
     } catch (error) {
       console.error('Upload failed:', error);
@@ -57,6 +58,7 @@ const Index = () => {
     setCurrentUpload(null);
     setIsUploading(false);
     setFilePreviewUrl('');
+    setCustomName('');
   };
 
   return (
@@ -123,6 +125,28 @@ const Index = () => {
                 </Button>
               </div>
 
+              <div className="glass-strong rounded-xl p-6 space-y-3 border border-primary/20">
+                <label htmlFor="custom-name" className="text-sm font-semibold text-foreground flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-accent" />
+                  Custom Link Name (Optional)
+                </label>
+                <input
+                  id="custom-name"
+                  type="text"
+                  value={customName}
+                  onChange={(e) => setCustomName(e.target.value)}
+                  placeholder="e.g., My Awesome Document"
+                  className="w-full px-4 py-3 rounded-lg glass border border-primary/30 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all text-foreground placeholder:text-muted-foreground"
+                  maxLength={100}
+                />
+                {customName && (
+                  <p className="text-xs text-muted-foreground flex items-center gap-1">
+                    <Check className="h-3 w-3 text-success" />
+                    Your link will display: <span className="font-semibold text-primary">"{customName}"</span>
+                  </p>
+                )}
+              </div>
+
               <ExpirationSelector selected={expiration} onChange={setExpiration} />
 
               <Button
@@ -144,7 +168,8 @@ const Index = () => {
             <div className="space-y-6">
               <URLCard 
                 url={getPublicUrl(currentUpload.short_id)} 
-                fileName={currentUpload.file_name} 
+                fileName={currentUpload.file_name}
+                customName={currentUpload.custom_name}
               />
               
               <Button
