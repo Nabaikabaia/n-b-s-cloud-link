@@ -145,7 +145,7 @@ export const useUploads = () => {
   };
 
   const getPublicUrl = (shortId: string): string => {
-    return `${window.location.origin}/d/${shortId}`;
+    return `${window.location.origin}/${shortId}`;
   };
 
   useEffect(() => {

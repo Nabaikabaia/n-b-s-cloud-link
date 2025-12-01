@@ -8,7 +8,7 @@ import ThemeToggle from '@/components/ThemeToggle';
 import crystalOrb from '@/assets/crystal-orb.png';
 
 const Download = () => {
-  const { shortId } = useParams<{ shortId: string }>();
+  const { identifier } = useParams<{ identifier: string }>();
   const navigate = useNavigate();
   const [upload, setUpload] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -16,23 +16,47 @@ const Download = () => {
   const [downloading, setDownloading] = useState(false);
 
   useEffect(() => {
-    if (!shortId) {
+    if (!identifier) {
       navigate('/');
       return;
     }
 
     fetchUpload();
-  }, [shortId]);
+  }, [identifier]);
 
   const fetchUpload = async () => {
+    if (!identifier) return;
+    
+    setLoading(true);
+    setError('');
+    
     try {
-      const { data, error: fetchError } = await supabase
+      // Try to find by short_id first
+      let { data, error: fetchError } = await supabase
         .from('uploads')
         .select('*')
-        .eq('short_id', shortId)
-        .single();
+        .eq('short_id', identifier)
+        .maybeSingle();
+
+      // If not found by short_id, try custom_name
+      if (!data) {
+        const result = await supabase
+          .from('uploads')
+          .select('*')
+          .eq('custom_name', identifier)
+          .maybeSingle();
+        
+        data = result.data;
+        fetchError = result.error;
+      }
 
       if (fetchError) throw fetchError;
+      
+      if (!data) {
+        setError('File not found or no longer available.');
+        setLoading(false);
+        return;
+      }
 
       // Check if expired
       if (data.expire_at && new Date(data.expire_at) < new Date()) {

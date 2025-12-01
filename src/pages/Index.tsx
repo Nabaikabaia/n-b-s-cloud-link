@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import ParticleBackground from '@/components/ParticleBackground';
 import UploadZone from '@/components/UploadZone';
 import UploadProgress from '@/components/UploadProgress';
@@ -13,6 +14,7 @@ import crystalOrb from '@/assets/crystal-orb.png';
 import { useUploads } from '@/hooks/useUploads';
 
 const Index = () => {
+  const navigate = useNavigate();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [filePreviewUrl, setFilePreviewUrl] = useState<string>('');
   const [isUploading, setIsUploading] = useState(false);
@@ -64,7 +66,18 @@ const Index = () => {
   return (
     <div className="min-h-screen relative overflow-hidden">
       <ParticleBackground />
-      <ThemeToggle />
+      
+      <div className="absolute top-4 right-4 z-10 flex gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => navigate("/api-docs")}
+          className="glass-panel"
+        >
+          API Docs
+        </Button>
+        <ThemeToggle />
+      </div>
 
       {/* Main content */}
       <div className="relative z-10 container mx-auto px-4 py-12">
