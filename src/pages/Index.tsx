@@ -6,6 +6,7 @@ import UploadProgress from '@/components/UploadProgress';
 import URLCard from '@/components/URLCard';
 import ExpirationSelector from '@/components/ExpirationSelector';
 import ThemeToggle from '@/components/ThemeToggle';
+import HamburgerMenu from '@/components/HamburgerMenu';
 import FilePreview from '@/components/FilePreview';
 import UploadHistory from '@/components/UploadHistory';
 import { Button } from '@/components/ui/button';
@@ -68,14 +69,7 @@ const Index = () => {
       <ParticleBackground />
       
       <div className="absolute top-4 right-4 z-10 flex gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => navigate("/api-docs")}
-          className="glass-panel"
-        >
-          API Docs
-        </Button>
+        <HamburgerMenu />
         <ThemeToggle />
       </div>
 
