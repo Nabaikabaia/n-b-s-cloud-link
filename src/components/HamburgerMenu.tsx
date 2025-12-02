@@ -28,10 +28,10 @@ const HamburgerMenu = () => {
     <>
       {/* Hamburger Button */}
       <Button
-        variant="ghost"
+        variant="outline"
         size="icon"
         onClick={() => setIsOpen(!isOpen)}
-        className="glass-panel relative z-50"
+        className="glass-strong border border-primary/20 relative z-50"
         aria-label="Menu"
       >
         {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
