@@ -1,6 +1,7 @@
 import { useState } from "react";
 import ParticleBackground from "@/components/ParticleBackground";
 import ThemeToggle from "@/components/ThemeToggle";
+import HamburgerMenu from "@/components/HamburgerMenu";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -25,12 +26,15 @@ const ApiDocs = () => {
     <div className="min-h-screen relative overflow-hidden">
       <ParticleBackground />
       
-      <div className="absolute top-4 right-4 z-10 flex gap-2">
+      <div className="fixed top-4 left-4 z-50">
+        <HamburgerMenu />
+      </div>
+      <div className="fixed top-4 right-4 z-50 flex gap-2">
         <Button
           variant="outline"
           size="icon"
           onClick={() => navigate("/")}
-          className="glass-panel"
+          className="glass-strong border border-primary/20"
         >
           <Home className="h-4 w-4" />
         </Button>

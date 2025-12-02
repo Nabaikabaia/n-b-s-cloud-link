@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Download as DownloadIcon, AlertCircle, Sparkles, FileDown } from 'lucide-react';
+import { Download as DownloadIcon, AlertCircle, Sparkles } from 'lucide-react';
 import ParticleBackground from '@/components/ParticleBackground';
 import ThemeToggle from '@/components/ThemeToggle';
+import HamburgerMenu from '@/components/HamburgerMenu';
 import crystalOrb from '@/assets/crystal-orb.png';
 
 const Download = () => {
@@ -15,16 +16,7 @@ const Download = () => {
   const [error, setError] = useState('');
   const [downloading, setDownloading] = useState(false);
 
-  useEffect(() => {
-    if (!identifier) {
-      navigate('/');
-      return;
-    }
-
-    fetchUpload();
-  }, [identifier]);
-
-  const fetchUpload = async () => {
+  const fetchUpload = useCallback(async () => {
     if (!identifier) return;
     
     setLoading(true);
@@ -72,7 +64,15 @@ const Download = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [identifier, navigate]);
+
+  useEffect(() => {
+    if (!identifier) {
+      navigate('/');
+      return;
+    }
+    fetchUpload();
+  }, [identifier, navigate, fetchUpload]);
 
   const handleDownload = async () => {
     if (!upload) return;
@@ -120,7 +120,13 @@ const Download = () => {
   return (
     <div className="min-h-screen relative overflow-hidden">
       <ParticleBackground />
-      <ThemeToggle />
+      
+      <div className="fixed top-4 left-4 z-50">
+        <HamburgerMenu />
+      </div>
+      <div className="fixed top-4 right-4 z-50">
+        <ThemeToggle />
+      </div>
 
       <div className="relative z-10 container mx-auto px-4 py-12">
         <header className="text-center mb-16 space-y-6">
