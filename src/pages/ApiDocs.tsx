@@ -26,15 +26,15 @@ const ApiDocs = () => {
     <div className="min-h-screen relative overflow-hidden">
       <ParticleBackground />
       
-      <div className="fixed top-4 left-4 z-50">
+      <div className="fixed top-4 left-4 z-[100] pointer-events-auto">
         <HamburgerMenu />
       </div>
-      <div className="fixed top-4 right-4 z-50 flex gap-2">
+      <div className="fixed top-4 right-4 z-[100] pointer-events-auto flex gap-2">
         <Button
           variant="outline"
           size="icon"
           onClick={() => navigate("/")}
-          className="glass-strong border border-primary/20"
+          className="glass-strong border border-primary/20 pointer-events-auto"
         >
           <Home className="h-4 w-4" />
         </Button>

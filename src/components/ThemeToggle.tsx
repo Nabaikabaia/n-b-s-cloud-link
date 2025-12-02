@@ -26,7 +26,7 @@ const ThemeToggle = () => {
       variant="outline"
       size="icon"
       onClick={toggleTheme}
-      className="glass-strong border border-primary/20 hover:border-primary transition-all duration-300"
+      className="glass-strong border border-primary/20 hover:border-primary transition-all duration-300 pointer-events-auto"
       aria-label="Toggle theme"
     >
       {theme === 'dark' ? (
