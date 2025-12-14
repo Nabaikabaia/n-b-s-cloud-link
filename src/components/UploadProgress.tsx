@@ -35,22 +35,22 @@ const UploadProgress = ({ fileName, fileSize }: UploadProgressProps) => {
   };
 
   return (
-    <div className="glass-strong rounded-2xl p-8 border border-primary/30">
-      <div className="flex items-center justify-center gap-3 mb-6">
-        <Loader2 className="w-6 h-6 text-primary animate-spin" />
-        <span className="text-lg font-semibold gradient-text">Processing Upload...</span>
-        <Sparkles className="w-5 h-5 text-accent animate-pulse" />
+    <div className="glass-strong rounded-2xl p-6 sm:p-8 border border-primary/30">
+      <div className="flex items-center justify-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+        <Loader2 className="w-5 h-5 sm:w-6 sm:h-6 text-primary animate-spin" />
+        <span className="text-base sm:text-lg font-semibold gradient-text">Processing Upload...</span>
+        <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-accent animate-pulse" />
       </div>
 
-      <div className="space-y-4">
-        <div className="flex justify-between text-sm">
-          <span className="text-foreground truncate max-w-[200px]">{fileName}</span>
+      <div className="space-y-3 sm:space-y-4">
+        <div className="flex justify-between text-xs sm:text-sm">
+          <span className="text-foreground truncate max-w-[150px] sm:max-w-[200px]">{fileName}</span>
           <span className="text-muted-foreground">{formatFileSize(fileSize)}</span>
         </div>
 
         <Progress value={progress} className="h-2" />
 
-        <div className="flex justify-between text-xs text-muted-foreground">
+        <div className="flex justify-between text-[10px] sm:text-xs text-muted-foreground">
           <span>Encrypting & Uploading</span>
           <span>{progress}%</span>
         </div>
