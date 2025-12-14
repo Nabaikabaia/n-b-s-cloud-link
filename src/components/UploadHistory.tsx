@@ -8,7 +8,7 @@ import { formatDistanceToNow } from 'date-fns';
 interface UploadHistoryProps {
   uploads: Upload[];
   onDelete: (upload: Upload) => void;
-  getPublicUrl: (shortId: string) => string;
+  getPublicUrl: (shortId: string, customName?: string | null) => string;
 }
 
 const UploadHistory = ({ uploads, onDelete, getPublicUrl }: UploadHistoryProps) => {
@@ -40,8 +40,8 @@ const UploadHistory = ({ uploads, onDelete, getPublicUrl }: UploadHistoryProps) 
     };
   };
 
-  const handleCopy = (shortId: string) => {
-    const url = getPublicUrl(shortId);
+  const handleCopy = (upload: Upload) => {
+    const url = getPublicUrl(upload.short_id, upload.custom_name);
     navigator.clipboard.writeText(url);
     toast({
       title: "✨ Copied!",
@@ -80,7 +80,7 @@ const UploadHistory = ({ uploads, onDelete, getPublicUrl }: UploadHistoryProps) 
       <div className="space-y-2 sm:space-y-3">
         {displayedUploads.map((upload, index) => {
           const expiryStatus = getExpiryStatus(upload.expire_at);
-          const url = getPublicUrl(upload.short_id);
+          const url = getPublicUrl(upload.short_id, upload.custom_name);
 
           return (
             <div
@@ -127,7 +127,7 @@ const UploadHistory = ({ uploads, onDelete, getPublicUrl }: UploadHistoryProps) 
                   <Button
                     size="sm"
                     variant="ghost"
-                    onClick={() => handleCopy(upload.short_id)}
+                    onClick={() => handleCopy(upload)}
                     className="hover:bg-primary/20 h-8 w-8 p-0 transition-all hover:scale-110"
                     disabled={expiryStatus.expired}
                   >
