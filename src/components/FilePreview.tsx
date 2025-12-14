@@ -31,22 +31,22 @@ const FilePreview = ({ file, previewUrl }: FilePreviewProps) => {
   };
 
   return (
-    <div className="glass-strong rounded-2xl p-6 border border-primary/30">
-      <div className="flex items-start gap-4">
+    <div className="glass-strong rounded-2xl p-4 sm:p-6 border border-primary/30 transition-all hover:border-primary/50">
+      <div className="flex items-start gap-3 sm:gap-4">
         {fileType === 'image' && previewUrl ? (
-          <div className="relative w-20 h-20 rounded-lg overflow-hidden border border-primary/50 glow-cyan shrink-0">
+          <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden border border-primary/50 glow-cyan shrink-0">
             <img src={previewUrl} alt={file.name} className="w-full h-full object-cover" />
           </div>
         ) : (
-          <div className="w-20 h-20 rounded-lg glass border border-primary/50 flex items-center justify-center shrink-0">
+          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg glass border border-primary/50 flex items-center justify-center shrink-0">
             {getFileIcon()}
           </div>
         )}
         
         <div className="flex-1 min-w-0">
-          <p className="text-sm text-muted-foreground">Selected file</p>
-          <p className="text-lg font-semibold truncate">{file.name}</p>
-          <div className="flex items-center gap-3 mt-2 text-sm text-muted-foreground">
+          <p className="text-xs sm:text-sm text-muted-foreground">Selected file</p>
+          <p className="text-base sm:text-lg font-semibold truncate">{file.name}</p>
+          <div className="flex items-center gap-2 sm:gap-3 mt-1 sm:mt-2 text-xs sm:text-sm text-muted-foreground">
             <span>{formatFileSize(file.size)}</span>
             <span>•</span>
             <span className="truncate">{file.type || 'Unknown type'}</span>

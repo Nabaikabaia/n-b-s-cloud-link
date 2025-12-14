@@ -24,7 +24,7 @@ const URLCard = ({ url, fileName, customName }: URLCardProps) => {
   };
 
   return (
-    <div className="relative overflow-hidden rounded-3xl glass-strong border border-primary/30 p-8 float" style={{ animationDelay: '0.5s' }}>
+    <div className="relative overflow-hidden rounded-3xl glass-strong border border-primary/30 p-6 sm:p-8" style={{ animationDelay: '0.5s' }}>
       {/* Holographic shimmer effect */}
       <div className="absolute inset-0 shimmer" />
       
@@ -32,34 +32,34 @@ const URLCard = ({ url, fileName, customName }: URLCardProps) => {
       <div className="absolute -top-20 -right-20 w-40 h-40 rounded-full bg-primary/30 blur-3xl" />
       <div className="absolute -bottom-20 -left-20 w-40 h-40 rounded-full bg-secondary/30 blur-3xl" />
 
-      <div className="relative z-10 space-y-6">
+      <div className="relative z-10 space-y-4 sm:space-y-6">
         <div className="flex items-center justify-center gap-2">
           <Sparkles className="w-5 h-5 text-accent animate-pulse" />
-          <h3 className="text-xl font-bold gradient-text">URL Generated!</h3>
+          <h3 className="text-lg sm:text-xl font-bold gradient-text">URL Generated!</h3>
           <Sparkles className="w-5 h-5 text-accent animate-pulse" />
         </div>
 
         <div className="space-y-3">
           {customName && (
             <div className="text-center">
-              <p className="text-lg font-bold text-primary mb-1">{customName}</p>
-              <p className="text-sm text-muted-foreground">({fileName})</p>
+              <p className="text-base sm:text-lg font-bold text-primary mb-1">{customName}</p>
+              <p className="text-xs sm:text-sm text-muted-foreground">({fileName})</p>
             </div>
           )}
           {!customName && (
-            <p className="text-sm text-muted-foreground text-center">File: {fileName}</p>
+            <p className="text-xs sm:text-sm text-muted-foreground text-center">File: {fileName}</p>
           )}
           
-          <div className="glass rounded-xl p-4 border border-primary/50 glow-cyan">
-            <div className="flex items-center justify-between gap-3">
-              <code className="text-sm text-primary font-mono truncate flex-1">
+          <div className="glass rounded-xl p-3 sm:p-4 border border-primary/50 glow-cyan">
+            <div className="flex items-center justify-between gap-2 sm:gap-3">
+              <code className="text-xs sm:text-sm text-primary font-mono truncate flex-1">
                 {url}
               </code>
               <Button
                 size="sm"
                 variant="ghost"
                 onClick={handleCopy}
-                className="shrink-0 hover:bg-primary/20"
+                className="shrink-0 hover:bg-primary/20 transition-all hover:scale-110 active:scale-95"
               >
                 {copied ? (
                   <Check className="w-4 h-4 text-success" />
@@ -71,21 +71,23 @@ const URLCard = ({ url, fileName, customName }: URLCardProps) => {
           </div>
         </div>
 
-        <div className="flex gap-3 justify-center">
+        <div className="flex gap-2 sm:gap-3 justify-center flex-wrap">
           <Button
             variant="outline"
-            className="glass border-primary/50 hover:bg-primary/20 hover:glow-cyan"
+            size="sm"
+            className="glass border-primary/50 hover:bg-primary/20 hover:glow-cyan transition-all hover:scale-105 active:scale-95 text-xs sm:text-sm"
             onClick={() => window.open(url, '_blank')}
           >
-            <ExternalLink className="w-4 h-4 mr-2" />
+            <ExternalLink className="w-4 h-4 mr-1 sm:mr-2" />
             Open Link
           </Button>
           
           <Button
             variant="outline"
-            className="glass border-secondary/50 hover:bg-secondary/20 hover:glow-purple"
+            size="sm"
+            className="glass border-secondary/50 hover:bg-secondary/20 hover:glow-purple transition-all hover:scale-105 active:scale-95 text-xs sm:text-sm"
           >
-            <QrCode className="w-4 h-4 mr-2" />
+            <QrCode className="w-4 h-4 mr-1 sm:mr-2" />
             QR Code
           </Button>
         </div>
