@@ -210,7 +210,7 @@ const Index = () => {
           {currentUpload && (
             <div className="space-y-4 sm:space-y-6 animate-fade-in">
               <URLCard 
-                url={getPublicUrl(currentUpload.short_id)} 
+                url={getPublicUrl(currentUpload.short_id, currentUpload.custom_name)} 
                 fileName={currentUpload.file_name}
                 customName={currentUpload.custom_name}
               />
