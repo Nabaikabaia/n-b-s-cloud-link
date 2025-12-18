@@ -1,13 +1,12 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Download as DownloadIcon, AlertCircle, Sparkles } from 'lucide-react';
+import { Download as DownloadIcon, AlertCircle, Sparkles, FileText, FileArchive, FileAudio, FileVideo, File as FileIcon, Image as ImageIcon } from 'lucide-react';
 import ParticleBackground from '@/components/ParticleBackground';
 import ThemeToggle from '@/components/ThemeToggle';
 import HamburgerMenu from '@/components/HamburgerMenu';
 import crystalOrb from '@/assets/crystal-orb.png';
-
 const Download = () => {
   const { identifier } = useParams<{ identifier: string }>();
   const navigate = useNavigate();
@@ -117,6 +116,43 @@ const Download = () => {
     return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
   };
 
+  const getFileType = (fileName: string) => {
+    const ext = fileName.split('.').pop()?.toLowerCase() || '';
+    const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp'];
+    const videoExts = ['mp4', 'webm', 'mov', 'avi', 'mkv'];
+    const audioExts = ['mp3', 'wav', 'ogg', 'flac', 'm4a'];
+    const archiveExts = ['zip', 'rar', '7z', 'tar', 'gz'];
+    const docExts = ['pdf', 'doc', 'docx', 'txt', 'rtf'];
+
+    if (imageExts.includes(ext)) return 'image';
+    if (videoExts.includes(ext)) return 'video';
+    if (audioExts.includes(ext)) return 'audio';
+    if (archiveExts.includes(ext)) return 'archive';
+    if (docExts.includes(ext)) return 'document';
+    return 'other';
+  };
+
+  const getFileIcon = (fileType: string) => {
+    switch (fileType) {
+      case 'image': return <ImageIcon className="w-12 h-12 text-primary" />;
+      case 'video': return <FileVideo className="w-12 h-12 text-secondary" />;
+      case 'audio': return <FileAudio className="w-12 h-12 text-accent" />;
+      case 'archive': return <FileArchive className="w-12 h-12 text-warning" />;
+      case 'document': return <FileText className="w-12 h-12 text-success" />;
+      default: return <FileIcon className="w-12 h-12 text-muted-foreground" />;
+    }
+  };
+
+  const previewUrl = useMemo(() => {
+    if (!upload) return null;
+    const fileType = getFileType(upload.file_name);
+    if (fileType === 'image') {
+      const { data } = supabase.storage.from('uploads').getPublicUrl(upload.storage_path);
+      return data.publicUrl;
+    }
+    return null;
+  }, [upload]);
+
   return (
     <div className="min-h-screen relative overflow-hidden">
       <ParticleBackground />
@@ -168,6 +204,23 @@ const Download = () => {
                 <Sparkles className="w-5 h-5 text-accent animate-pulse" />
                 <h2 className="text-2xl font-bold gradient-text">File Ready!</h2>
                 <Sparkles className="w-5 h-5 text-accent animate-pulse" />
+              </div>
+
+              {/* File Preview */}
+              <div className="glass rounded-xl p-4 flex items-center justify-center">
+                {previewUrl ? (
+                  <div className="relative w-full max-w-md overflow-hidden rounded-lg border border-primary/50 glow-cyan">
+                    <img 
+                      src={previewUrl} 
+                      alt={upload.file_name} 
+                      className="w-full h-auto max-h-64 object-contain bg-background/50"
+                    />
+                  </div>
+                ) : (
+                  <div className="w-24 h-24 rounded-xl glass border border-primary/50 flex items-center justify-center">
+                    {getFileIcon(getFileType(upload.file_name))}
+                  </div>
+                )}
               </div>
 
               <div className="glass rounded-xl p-6 space-y-4">
