@@ -2,11 +2,12 @@ import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Download as DownloadIcon, AlertCircle, Sparkles, FileText, FileArchive, FileAudio, FileVideo, File as FileIcon, Image as ImageIcon } from 'lucide-react';
+import { Download as DownloadIcon, AlertCircle, Sparkles, FileText, FileArchive, FileAudio, FileVideo, File as FileIcon, Image as ImageIcon, X, Maximize2 } from 'lucide-react';
 import ParticleBackground from '@/components/ParticleBackground';
 import ThemeToggle from '@/components/ThemeToggle';
 import HamburgerMenu from '@/components/HamburgerMenu';
 import crystalOrb from '@/assets/crystal-orb.png';
+
 const Download = () => {
   const { identifier } = useParams<{ identifier: string }>();
   const navigate = useNavigate();
@@ -14,6 +15,7 @@ const Download = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [downloading, setDownloading] = useState(false);
+  const [showImageModal, setShowImageModal] = useState(false);
 
   const fetchUpload = useCallback(async () => {
     if (!identifier) return;
@@ -146,12 +148,14 @@ const Download = () => {
   const previewUrl = useMemo(() => {
     if (!upload) return null;
     const fileType = getFileType(upload.file_name);
-    if (fileType === 'image') {
+    if (fileType === 'image' || fileType === 'video') {
       const { data } = supabase.storage.from('uploads').getPublicUrl(upload.storage_path);
       return data.publicUrl;
     }
     return null;
   }, [upload]);
+
+  const fileType = upload ? getFileType(upload.file_name) : null;
 
   return (
     <div className="min-h-screen relative overflow-hidden">
@@ -208,17 +212,34 @@ const Download = () => {
 
               {/* File Preview */}
               <div className="glass rounded-xl p-4 flex items-center justify-center">
-                {previewUrl ? (
-                  <div className="relative w-full max-w-md overflow-hidden rounded-lg border border-primary/50 glow-cyan">
+                {previewUrl && fileType === 'image' ? (
+                  <div 
+                    className="relative w-full max-w-md overflow-hidden rounded-lg border border-primary/50 glow-cyan cursor-pointer group"
+                    onClick={() => setShowImageModal(true)}
+                  >
                     <img 
                       src={previewUrl} 
                       alt={upload.file_name} 
                       className="w-full h-auto max-h-64 object-contain bg-background/50"
                     />
+                    <div className="absolute inset-0 bg-background/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <Maximize2 className="w-8 h-8 text-primary" />
+                    </div>
+                  </div>
+                ) : previewUrl && fileType === 'video' ? (
+                  <div className="relative w-full max-w-md overflow-hidden rounded-lg border border-secondary/50">
+                    <video 
+                      src={previewUrl}
+                      controls
+                      className="w-full h-auto max-h-80 bg-background/50"
+                      preload="metadata"
+                    >
+                      Your browser does not support video playback.
+                    </video>
                   </div>
                 ) : (
                   <div className="w-24 h-24 rounded-xl glass border border-primary/50 flex items-center justify-center">
-                    {getFileIcon(getFileType(upload.file_name))}
+                    {getFileIcon(fileType || 'other')}
                   </div>
                 )}
               </div>
@@ -294,6 +315,27 @@ const Download = () => {
       {/* Ambient glow effects */}
       <div className="fixed top-0 left-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
       <div className="fixed bottom-0 right-0 w-96 h-96 bg-secondary/10 rounded-full blur-3xl translate-x-1/2 translate-y-1/2 pointer-events-none" />
+
+      {/* Full-size Image Modal */}
+      {showImageModal && previewUrl && (
+        <div 
+          className="fixed inset-0 z-[200] bg-background/90 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={() => setShowImageModal(false)}
+        >
+          <button 
+            className="absolute top-4 right-4 p-2 glass rounded-full border border-primary/50 hover:border-primary transition-colors"
+            onClick={() => setShowImageModal(false)}
+          >
+            <X className="w-6 h-6" />
+          </button>
+          <img 
+            src={previewUrl} 
+            alt={upload?.file_name} 
+            className="max-w-full max-h-[90vh] object-contain rounded-lg border border-primary/30 glow-cyan"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
     </div>
   );
 };
