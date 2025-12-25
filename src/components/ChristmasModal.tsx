@@ -1,11 +1,28 @@
-import { useState, useEffect } from 'react';
-import { X, Gift, Sparkles } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { X, Gift, Sparkles, Volume2, VolumeX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import christmasVideo from '@/assets/christmas-greeting.mp4';
+import christmasMusic from '@/assets/christmas-music.mp3';
 
 const ChristmasModal = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [hasShown, setHasShown] = useState(false);
+  const [isMusicPlaying, setIsMusicPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    // Initialize audio
+    audioRef.current = new Audio(christmasMusic);
+    audioRef.current.loop = true;
+    audioRef.current.volume = 0.3;
+
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, []);
 
   useEffect(() => {
     // Check if already shown this session
@@ -20,6 +37,35 @@ const ChristmasModal = () => {
       return () => clearTimeout(timer);
     }
   }, [hasShown]);
+
+  useEffect(() => {
+    // Play music when modal opens
+    if (isOpen && audioRef.current) {
+      audioRef.current.play().then(() => {
+        setIsMusicPlaying(true);
+      }).catch((err) => {
+        console.log('Audio autoplay prevented:', err);
+      });
+    }
+    
+    // Stop music when modal closes
+    if (!isOpen && audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      setIsMusicPlaying(false);
+    }
+  }, [isOpen]);
+
+  const toggleMusic = () => {
+    if (audioRef.current) {
+      if (isMusicPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play();
+      }
+      setIsMusicPlaying(!isMusicPlaying);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -39,6 +85,15 @@ const ChristmasModal = () => {
           className="absolute -top-3 -right-3 z-10 p-2 rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors shadow-lg"
         >
           <X className="h-5 w-5" />
+        </button>
+
+        {/* Music toggle button */}
+        <button
+          onClick={toggleMusic}
+          className="absolute -top-3 left-1/2 -translate-x-1/2 z-10 p-2 rounded-full bg-[hsl(140,60%,35%)] text-white hover:bg-[hsl(140,60%,30%)] transition-colors shadow-lg"
+          title={isMusicPlaying ? 'Mute music' : 'Play music'}
+        >
+          {isMusicPlaying ? <Volume2 className="h-5 w-5" /> : <VolumeX className="h-5 w-5" />}
         </button>
 
         {/* Card */}
