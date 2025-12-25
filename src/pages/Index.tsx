@@ -9,10 +9,13 @@ import ThemeToggle from '@/components/ThemeToggle';
 import HamburgerMenu from '@/components/HamburgerMenu';
 import FilePreview from '@/components/FilePreview';
 import UploadHistory from '@/components/UploadHistory';
+import SnowfallEffect from '@/components/SnowfallEffect';
+import ChristmasModal from '@/components/ChristmasModal';
 import { Button } from '@/components/ui/button';
 import { Zap, Shield, History, Sparkles, Check, ArrowUp } from 'lucide-react';
 import crystalOrb from '@/assets/crystal-orb.png';
 import { useUploads } from '@/hooks/useUploads';
+import { useChristmasTheme } from '@/hooks/useChristmasTheme';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -26,6 +29,7 @@ const Index = () => {
   const [showScrollTop, setShowScrollTop] = useState(false);
   
   const { uploads, uploadFile, deleteUpload, getPublicUrl, isLoading } = useUploads();
+  const { isChristmasDay } = useChristmasTheme();
 
   // Scroll to top button visibility
   useEffect(() => {
@@ -80,6 +84,10 @@ const Index = () => {
 
   return (
     <div className="min-h-screen relative overflow-hidden">
+      {/* Christmas Effects - Only on Dec 25 */}
+      {isChristmasDay && <SnowfallEffect />}
+      {isChristmasDay && <ChristmasModal />}
+      
       <ParticleBackground />
       
       <div className="fixed top-4 left-4 z-[100] pointer-events-auto">
@@ -112,12 +120,12 @@ const Index = () => {
             />
           </div>
           
-          <h1 className="text-4xl sm:text-6xl md:text-7xl font-bold gradient-text mb-2 sm:mb-4 tracking-tight">
-            Nãbēēs Uploader
+          <h1 className={`text-4xl sm:text-6xl md:text-7xl font-bold gradient-text mb-2 sm:mb-4 tracking-tight ${isChristmasDay ? 'christmas-glow' : ''}`}>
+            {isChristmasDay ? '🎄 Nãbēēs Uploader 🎄' : 'Nãbēēs Uploader'}
           </h1>
           
           <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto px-4">
-            Your File, One Link, Zero Stress
+            {isChristmasDay ? '🎁 Your File, One Link, Zero Stress - Merry Christmas! 🎅' : 'Your File, One Link, Zero Stress'}
           </p>
           
           <div className="flex items-center justify-center gap-4 sm:gap-6 text-sm text-muted-foreground flex-wrap px-4">

@@ -278,4 +278,28 @@ All colors MUST be HSL.
     overflow: hidden;
     pointer-events: none;
   }
+
+  /* Christmas Theme - Only active on Dec 25 */
+  .christmas-glow {
+    text-shadow: 
+      0 0 10px hsl(0 70% 50% / 0.5),
+      0 0 20px hsl(140 60% 45% / 0.3),
+      0 0 30px hsl(0 70% 50% / 0.2);
+    animation: christmas-pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes christmas-pulse {
+    0%, 100% {
+      text-shadow: 
+        0 0 10px hsl(0 70% 50% / 0.5),
+        0 0 20px hsl(140 60% 45% / 0.3),
+        0 0 30px hsl(0 70% 50% / 0.2);
+    }
+    50% {
+      text-shadow: 
+        0 0 20px hsl(140 60% 45% / 0.6),
+        0 0 40px hsl(0 70% 50% / 0.4),
+        0 0 60px hsl(140 60% 45% / 0.3);
+    }
+  }
 }
