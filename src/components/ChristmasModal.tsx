@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { X, Gift, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import christmasVideo from '@/assets/christmas-greeting.mp4';
 
 const ChristmasModal = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -64,12 +65,13 @@ const ChristmasModal = () => {
 
             {/* Video Container */}
             <div className="relative aspect-video rounded-xl overflow-hidden border border-border/50 shadow-2xl mb-6">
-              <iframe
-                src="https://www.youtube.com/embed/PoAGasPLh30?autoplay=1&mute=0"
-                title="Merry Christmas from Nabees Tech"
-                className="w-full h-full"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
+              <video
+                src={christmasVideo}
+                autoPlay
+                loop
+                muted={false}
+                controls
+                className="w-full h-full object-cover"
               />
             </div>
 
