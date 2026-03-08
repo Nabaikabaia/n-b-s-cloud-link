@@ -131,6 +131,7 @@ const Index = () => {
     setUrlInput('');
     setUrlFileInfo(null);
     setUploadMode('file');
+    setCopiedBaseUrl(false);
   };
 
   return (
