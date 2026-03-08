@@ -109,7 +109,7 @@ const ApiDocs = () => {
     params.set("url", url);
     if (shortId) params.set("shortId", shortId);
     if (customName) params.set("customName", customName);
-    return `${functionsUrl}/upload-from-url?${params.toString()}`;
+    return `${apiUrl}/upload-from-url?${params.toString()}`;
   };
 
   return (
