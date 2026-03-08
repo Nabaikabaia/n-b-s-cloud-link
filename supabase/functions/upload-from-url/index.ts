@@ -101,6 +101,15 @@ Deno.serve(async (req) => {
     // Determine file size
     const fileSize = actualLength ? parseInt(actualLength, 10) : 0;
 
+    // Force 1-hour expiry for files >50MB
+    let finalExpireAt = expireAt;
+    if (fileSize > 50 * 1024 * 1024) {
+      const oneHourFromNow = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+      if (!finalExpireAt || new Date(finalExpireAt) > new Date(oneHourFromNow)) {
+        finalExpireAt = oneHourFromNow;
+      }
+    }
+
     // Create database record
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
@@ -112,7 +121,7 @@ Deno.serve(async (req) => {
         file_size: fileSize,
         file_type: contentType,
         storage_path: storagePath,
-        expire_at: expireAt,
+        expire_at: finalExpireAt,
         custom_name: customName || null,
       })
       .select()

@@ -309,9 +309,12 @@ const Index = () => {
             </div>
           )}
 
-          {isUploading && selectedFile && (
+          {isUploading && (selectedFile || uploadMode === 'url') && (
             <div className="animate-fade-in">
-              <UploadProgress fileName={selectedFile.name} fileSize={selectedFile.size} />
+              <UploadProgress 
+                fileName={selectedFile?.name || urlInput.split('/').pop() || 'Remote file'} 
+                fileSize={selectedFile?.size || 0} 
+              />
             </div>
           )}
 
