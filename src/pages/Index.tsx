@@ -253,6 +253,32 @@ const Index = () => {
                     className="w-full px-4 py-3 rounded-lg glass border border-primary/30 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all text-foreground placeholder:text-muted-foreground"
                   />
 
+                  {/* Base upload URL - shown after URL is pasted */}
+                  {urlInput.trim() && (
+                    <div className="flex items-center gap-2 glass rounded-lg px-4 py-2.5 border border-primary/20 animate-fade-in">
+                      <span className="text-xs text-muted-foreground shrink-0">Your file will be at:</span>
+                      <code className="text-xs font-mono text-primary truncate flex-1">
+                        {`${window.location.origin}/${customName || '<short-id>'}`}
+                      </code>
+                      <button
+                        onClick={() => {
+                          const baseUrl = `${window.location.origin}/`;
+                          navigator.clipboard.writeText(baseUrl);
+                          setCopiedBaseUrl(true);
+                          setTimeout(() => setCopiedBaseUrl(false), 2000);
+                        }}
+                        className="shrink-0 p-1.5 rounded-md hover:bg-primary/10 transition-colors"
+                        title="Copy base URL"
+                      >
+                        {copiedBaseUrl ? (
+                          <CheckCheck className="h-3.5 w-3.5 text-success" />
+                        ) : (
+                          <Copy className="h-3.5 w-3.5 text-muted-foreground hover:text-primary" />
+                        )}
+                      </button>
+                    </div>
+                  )}
+
                   {/* File info display */}
                   {isCheckingUrl && (
                     <div className="flex items-center gap-2 text-sm text-muted-foreground animate-fade-in">
