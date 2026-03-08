@@ -3,40 +3,47 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const buildHeaders = (url: string, withReferer = false, withRange = false) => {
+const browserHeaders = (url: string, withReferer = false) => {
   const parsed = new URL(url);
   return {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
     'Accept': '*/*',
     'Accept-Language': 'en-US,en;q=0.9',
-    'x-supabase-client-platform': 'deno',
     ...(withReferer
       ? {
           'Origin': `${parsed.protocol}//${parsed.host}`,
           'Referer': `${parsed.protocol}//${parsed.host}/`,
         }
       : {}),
-    ...(withRange ? { Range: 'bytes=0-0' } : {}),
   };
 };
 
-const fetchWithFallback = async (url: string) => {
-  const first = await fetch(url, {
-    method: 'GET',
-    headers: buildHeaders(url, false, true),
-    redirect: 'follow',
-  });
+// Try multiple strategies to get file metadata without downloading the whole file
+async function getFileInfo(url: string) {
+  // Strategy 1: HEAD request (cheapest)
+  for (const withReferer of [false, true]) {
+    const res = await fetch(url, {
+      method: 'HEAD',
+      headers: browserHeaders(url, withReferer),
+      redirect: 'follow',
+    }).catch(() => null);
+    if (res && res.ok) return res;
+  }
 
-  if (first.status !== 403) return first;
+  // Strategy 2: GET request (cancel body immediately after reading headers)
+  for (const withReferer of [false, true]) {
+    const res = await fetch(url, {
+      method: 'GET',
+      headers: browserHeaders(url, withReferer),
+      redirect: 'follow',
+    }).catch(() => null);
+    if (res && res.ok) return res;
+    if (res && res.status !== 403) return res; // non-403 error, return as-is
+    res?.body?.cancel();
+  }
 
-  first.body?.cancel();
-
-  return fetch(url, {
-    method: 'GET',
-    headers: buildHeaders(url, true, true),
-    redirect: 'follow',
-  });
-};
+  return null;
+}
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -52,33 +59,23 @@ Deno.serve(async (req) => {
       });
     }
 
+    const response = await getFileInfo(url);
+
+    if (!response || !response.ok) {
+      const status = response?.status || 'unknown';
+      const statusText = response?.statusText || 'Could not reach URL';
+      return new Response(
+        JSON.stringify({ error: `Failed to fetch URL metadata: ${status} ${statusText}` }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+      );
+    }
+
     let contentLength: number | null = null;
     let contentType = 'application/octet-stream';
     let fileName = 'file';
 
-    const response = await fetchWithFallback(url);
-
-    if (!response.ok) {
-      const remoteError = await response.text().catch(() => '');
-      return new Response(
-        JSON.stringify({
-          error: `Failed to fetch URL metadata: ${response.status} ${response.statusText}${remoteError ? ` - ${remoteError.slice(0, 200)}` : ''}`,
-        }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        },
-      );
-    }
-
-    const contentRange = response.headers.get('content-range');
     const cl = response.headers.get('content-length');
-    if (contentRange && contentRange.includes('/')) {
-      const totalSize = Number(contentRange.split('/').pop());
-      if (Number.isFinite(totalSize) && totalSize > 0) contentLength = totalSize;
-    } else if (cl) {
-      contentLength = parseInt(cl, 10);
-    }
+    if (cl) contentLength = parseInt(cl, 10);
     contentType = response.headers.get('content-type') || contentType;
 
     const cd = response.headers.get('content-disposition');
@@ -95,23 +92,14 @@ Deno.serve(async (req) => {
           const last = decodeURIComponent(segments[segments.length - 1]);
           if (last.includes('.')) fileName = last;
         }
-      } catch {
-        // ignore
-      }
+      } catch { /* ignore */ }
     }
 
     response.body?.cancel();
 
     return new Response(
-      JSON.stringify({
-        fileSize: contentLength,
-        contentType,
-        fileName,
-      }),
-      {
-        status: 200,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      },
+      JSON.stringify({ fileSize: contentLength, contentType, fileName }),
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
     );
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
