@@ -195,7 +195,7 @@ Deno.serve(async (req) => {
         file_type: contentType,
         storage_path: storagePath,
         expire_at: finalExpireAt,
-        custom_name: customName || null,
+        custom_name: customName || fileName || null,
       })
       .select()
       .single();
