@@ -444,7 +444,7 @@ const ApiDocs = () => {
               title="Check File Info"
               desc="Get file metadata before uploading."
             >
-              <CodeBlock id="check" code={`curl -X POST ${functionsUrl}/check-url-file \\
+              <CodeBlock id="check" code={`curl -X POST ${apiUrl}/check-url-file \\
   -H "Content-Type: application/json" \\
   -d '{"url": "https://example.com/video.mp4"}'`} onCopy={copy} copied={copiedSection} />
               <pre className="bg-muted/20 rounded-xl p-3 text-[10px] font-mono text-foreground/60 border border-border/30">{`{
