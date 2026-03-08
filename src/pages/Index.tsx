@@ -28,8 +28,10 @@ const Index = () => {
   const [showHistory, setShowHistory] = useState(false);
   const [customName, setCustomName] = useState('');
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [uploadMode, setUploadMode] = useState<'file' | 'url'>('file');
+  const [urlInput, setUrlInput] = useState('');
   
-  const { uploads, uploadFile, deleteUpload, getPublicUrl, isLoading } = useUploads();
+  const { uploads, uploadFile, uploadFromUrl, deleteUpload, getPublicUrl, isLoading } = useUploads();
   const { isChristmasDay } = useChristmasTheme();
 
   // Scroll to top button visibility
