@@ -462,59 +462,42 @@ ${apiUrl}/upload?url=https://example.com/video.mp4&customName=cool-video`} onCop
 
               <TabsContent value="js" className="space-y-3">
                 <ExampleLabel>Upload from URL</ExampleLabel>
-                <CodeBlock id="js-url" code={`const res = await fetch("${apiUrl}/upload-from-url", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    url: "https://example.com/video.mp4",
-    shortId: "MyVid123",
-    customName: "cool-video",
-  }),
-});
+                <CodeBlock id="js-url" code={`// Simple GET — works in browser too
+const res = await fetch("${apiUrl}/upload?url=" + encodeURIComponent("https://example.com/video.mp4") + "&customName=cool-video");
 const data = await res.json();
-console.log("Download:", "${baseUrl}/" + (data.custom_name || data.short_id));`} onCopy={copy} copied={copiedSection} />
+console.log("Download:", data.download_url);`} onCopy={copy} copied={copiedSection} />
               </TabsContent>
 
               <TabsContent value="python" className="space-y-3">
                 <ExampleLabel>Upload from URL</ExampleLabel>
                 <CodeBlock id="py-url" code={`import requests
 
-res = requests.post(
-    "${apiUrl}/upload-from-url",
-    json={
+res = requests.get(
+    "${apiUrl}/upload",
+    params={
         "url": "https://example.com/video.mp4",
-        "shortId": "MyVid123",
         "customName": "cool-video",
     },
 )
 data = res.json()
-print("Download:", "${baseUrl}/" + (data.get("custom_name") or data["short_id"]))`} onCopy={copy} copied={copiedSection} />
+print("Download:", data["download_url"])`} onCopy={copy} copied={copiedSection} />
               </TabsContent>
 
               <TabsContent value="node" className="space-y-3">
                 <ExampleLabel>Upload from URL</ExampleLabel>
-                <CodeBlock id="node-url" code={`const res = await fetch("${apiUrl}/upload-from-url", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    url: "https://example.com/video.mp4",
-    shortId: "MyVid123",
-    customName: "cool-video",
-  }),
-});
+                <CodeBlock id="node-url" code={`const url = new URL("${apiUrl}/upload");
+url.searchParams.set("url", "https://example.com/video.mp4");
+url.searchParams.set("customName", "cool-video");
+
+const res = await fetch(url);
 const data = await res.json();
-console.log("Download:", "${baseUrl}/" + (data.custom_name || data.short_id));`} onCopy={copy} copied={copiedSection} />
+console.log("Download:", data.download_url);`} onCopy={copy} copied={copiedSection} />
               </TabsContent>
 
               <TabsContent value="curl" className="space-y-3">
                 <ExampleLabel>Upload from URL</ExampleLabel>
-                <CodeBlock id="curl-url" code={`curl -X POST ${apiUrl}/upload-from-url \\
-  -H "Content-Type: application/json" \\
-  -d '{
-    "url": "https://example.com/video.mp4",
-    "shortId": "MyVid123",
-    "customName": "cool-video"
-  }'`} onCopy={copy} copied={copiedSection} />
+                <CodeBlock id="curl-url" code={`# Just paste in terminal or browser:
+curl "${apiUrl}/upload?url=https%3A%2F%2Fexample.com%2Fvideo.mp4&customName=cool-video"`} onCopy={copy} copied={copiedSection} />
               </TabsContent>
             </Tabs>
           </div>
