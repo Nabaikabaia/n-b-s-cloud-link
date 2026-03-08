@@ -111,6 +111,48 @@ export const useUploads = () => {
     }
   };
 
+  const uploadFromUrl = async (url: string, expiration: string, customName?: string) => {
+    try {
+      setIsLoading(true);
+
+      const { data: shortIdData, error: shortIdError } = await supabase.rpc('generate_short_id');
+      if (shortIdError) throw shortIdError;
+      const shortId = shortIdData;
+
+      let expireAt: string | null = null;
+      if (expiration !== 'never') {
+        const hours = { '1h': 1, '24h': 24, '7d': 168 }[expiration] || 24;
+        const expiryDate = new Date();
+        expiryDate.setHours(expiryDate.getHours() + hours);
+        expireAt = expiryDate.toISOString();
+      }
+
+      const { data, error } = await supabase.functions.invoke('upload-from-url', {
+        body: { url, shortId, expireAt, customName: customName?.trim() || null },
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "✨ Upload Successful!",
+        description: "File from URL has been uploaded to the cloud",
+      });
+
+      await fetchUploads();
+      return data;
+    } catch (error: any) {
+      console.error('Upload from URL error:', error);
+      toast({
+        title: "Upload Failed",
+        description: error.message || "Could not fetch and upload from URL",
+        variant: "destructive",
+      });
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const deleteUpload = async (upload: Upload) => {
     try {
       // Delete from storage
@@ -157,6 +199,7 @@ export const useUploads = () => {
     uploads,
     isLoading,
     uploadFile,
+    uploadFromUrl,
     deleteUpload,
     getPublicUrl,
     fetchUploads,
