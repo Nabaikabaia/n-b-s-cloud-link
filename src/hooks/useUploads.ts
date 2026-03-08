@@ -49,7 +49,14 @@ export const useUploads = () => {
 
       // Calculate expiration date
       let expireAt: string | null = null;
-      if (expiration !== 'never') {
+      const isLargeFile = file.size > 50 * 1024 * 1024;
+      
+      if (isLargeFile) {
+        // Force 1-hour expiry for files >50MB
+        const expiryDate = new Date();
+        expiryDate.setHours(expiryDate.getHours() + 1);
+        expireAt = expiryDate.toISOString();
+      } else if (expiration !== 'never') {
         const hours = {
           '1h': 1,
           '24h': 24,
