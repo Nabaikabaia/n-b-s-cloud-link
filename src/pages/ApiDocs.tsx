@@ -484,7 +484,7 @@ const ApiDocs = () => {
 
               <TabsContent value="js" className="space-y-3">
                 <ExampleLabel>Upload from URL</ExampleLabel>
-                <CodeBlock id="js-url" code={`const res = await fetch("${functionsUrl}/upload-from-url", {
+                <CodeBlock id="js-url" code={`const res = await fetch("${apiUrl}/upload-from-url", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
