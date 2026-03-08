@@ -214,9 +214,9 @@ const ApiDocs = () => {
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Request URL</span>
                       <div className="flex gap-1.5">
-                        <CopyBtn id="live-req-url" text={buildBrowserUrl(testUrl.trim(), testCustomName.trim() || `test-${Date.now()}`, testCustomName.trim() || undefined)} label="Copy" />
+                        <CopyBtn id="live-req-url" text={buildBrowserUrl(testUrl.trim(), testCustomName.trim() || undefined)} label="Copy" />
                         <button
-                          onClick={() => window.open(buildBrowserUrl(testUrl.trim(), testCustomName.trim() || `test-${Date.now()}`, testCustomName.trim() || undefined), '_blank')}
+                          onClick={() => window.open(buildBrowserUrl(testUrl.trim(), testCustomName.trim() || undefined), '_blank')}
                           className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium bg-primary/10 text-primary hover:bg-primary/15 transition-colors"
                         >
                           <ExternalLink className="h-3 w-3" />
@@ -225,7 +225,7 @@ const ApiDocs = () => {
                       </div>
                     </div>
                     <code className="text-[10px] font-mono text-foreground/60 break-all block leading-relaxed">
-                      {buildBrowserUrl(testUrl.trim(), testCustomName.trim() || "<auto>", testCustomName.trim() || undefined)}
+                      {buildBrowserUrl(testUrl.trim(), testCustomName.trim() || undefined)}
                     </code>
                   </div>
                 )}
