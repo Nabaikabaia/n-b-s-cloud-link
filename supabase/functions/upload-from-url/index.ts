@@ -203,7 +203,9 @@ Deno.serve(async (req) => {
     if (dbError) throw dbError;
 
     // Build the download URL
-    const origin = req.headers.get('origin') || req.headers.get('referer')?.replace(/\/$/, '') || '';
+    const rawOrigin = req.headers.get('origin');
+    const referer = req.headers.get('referer');
+    const origin = rawOrigin || (referer ? new URL(referer).origin : '');
     const identifier = uploadRecord.custom_name || uploadRecord.short_id;
     const downloadUrl = origin ? `${origin}/${identifier}` : `/${identifier}`;
 
