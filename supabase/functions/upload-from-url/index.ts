@@ -20,8 +20,13 @@ Deno.serve(async (req) => {
       });
     }
 
+    const fetchHeaders = {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      'Accept': '*/*',
+    };
+
     // Fetch the remote file - HEAD first to check size
-    const headRes = await fetch(url, { method: 'HEAD' }).catch(() => null);
+    const headRes = await fetch(url, { method: 'HEAD', headers: fetchHeaders }).catch(() => null);
     const contentLengthHeader = headRes?.headers.get('content-length');
     
     if (contentLengthHeader && parseInt(contentLengthHeader, 10) > 200 * 1024 * 1024) {
@@ -32,7 +37,7 @@ Deno.serve(async (req) => {
     }
 
     // Fetch the file
-    const response = await fetch(url);
+    const response = await fetch(url, { headers: fetchHeaders });
     if (!response.ok) {
       return new Response(JSON.stringify({ error: `Failed to fetch URL: ${response.status} ${response.statusText}` }), {
         status: 400,
