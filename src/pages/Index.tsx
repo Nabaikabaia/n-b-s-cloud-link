@@ -251,6 +251,37 @@ const Index = () => {
                     className="w-full px-4 py-3 rounded-lg glass border border-primary/30 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all text-foreground placeholder:text-muted-foreground"
                   />
 
+                  {/* File info display */}
+                  {isCheckingUrl && (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground animate-fade-in">
+                      <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                      Checking file info...
+                    </div>
+                  )}
+                  {urlFileInfo && !isCheckingUrl && (
+                    <div className="glass rounded-xl p-4 border border-primary/20 space-y-2 animate-fade-in">
+                      <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+                        <HardDrive className="h-4 w-4 text-primary" />
+                        File Details
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 text-sm">
+                        <div className="text-muted-foreground">Name:</div>
+                        <div className="text-foreground truncate font-medium">{urlFileInfo.fileName}</div>
+                        <div className="text-muted-foreground">Size:</div>
+                        <div className="text-foreground font-medium">
+                          {urlFileInfo.fileSize ? formatFileSize(urlFileInfo.fileSize) : 'Unknown'}
+                        </div>
+                        <div className="text-muted-foreground">Type:</div>
+                        <div className="text-foreground font-medium">{urlFileInfo.contentType}</div>
+                      </div>
+                      {urlFileInfo.fileSize && urlFileInfo.fileSize > 50 * 1024 * 1024 && (
+                        <div className="flex items-center gap-2 text-xs text-amber-400 mt-2">
+                          <AlertTriangle className="h-3.5 w-3.5" />
+                          Large file — will auto-expire after 1 hour
+                        </div>
+                      )}
+                    </div>
+                  )}
                   <div className="glass-strong rounded-xl p-4 sm:p-6 space-y-3 border border-primary/20 transition-all hover:border-primary/40">
                     <label htmlFor="url-custom-name" className="text-sm font-semibold text-foreground flex items-center gap-2">
                       <Sparkles className="h-4 w-4 text-accent" />
