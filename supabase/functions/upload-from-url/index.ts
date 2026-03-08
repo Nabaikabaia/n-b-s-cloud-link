@@ -5,6 +5,42 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+const MAX_URL_UPLOAD_BYTES = 1024 * 1024 * 1024; // 1GB hard cap
+
+const buildHeaders = (url: string, withReferer = false) => {
+  const parsed = new URL(url);
+  return {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+    'Accept': '*/*',
+    'Accept-Language': 'en-US,en;q=0.9',
+    'x-supabase-client-platform': 'deno',
+    ...(withReferer
+      ? {
+          'Origin': `${parsed.protocol}//${parsed.host}`,
+          'Referer': `${parsed.protocol}//${parsed.host}/`,
+        }
+      : {}),
+  };
+};
+
+const fetchRemoteFile = async (url: string) => {
+  const first = await fetch(url, {
+    method: 'GET',
+    headers: buildHeaders(url, false),
+    redirect: 'follow',
+  });
+
+  if (first.status !== 403) return first;
+
+  first.body?.cancel();
+
+  return fetch(url, {
+    method: 'GET',
+    headers: buildHeaders(url, true),
+    redirect: 'follow',
+  });
+};
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -20,37 +56,36 @@ Deno.serve(async (req) => {
       });
     }
 
-    const fetchHeaders = {
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-      'Accept': '*/*',
-    };
+    const response = await fetchRemoteFile(url);
 
-    // Fetch the remote file - HEAD first to check size
-    const headRes = await fetch(url, { method: 'HEAD', headers: fetchHeaders }).catch(() => null);
-    const contentLengthHeader = headRes?.headers.get('content-length');
-    
-    if (contentLengthHeader && parseInt(contentLengthHeader, 10) > 200 * 1024 * 1024) {
-      return new Response(JSON.stringify({ error: 'File exceeds 200MB limit for URL uploads' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    // Fetch the file
-    const response = await fetch(url, { headers: fetchHeaders });
     if (!response.ok) {
-      return new Response(JSON.stringify({ error: `Failed to fetch URL: ${response.status} ${response.statusText}` }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      const remoteError = await response.text().catch(() => '');
+      return new Response(
+        JSON.stringify({
+          error: `Failed to fetch URL: ${response.status} ${response.statusText}${remoteError ? ` - ${remoteError.slice(0, 200)}` : ''}`,
+        }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        },
+      );
     }
 
     const contentType = response.headers.get('content-type') || 'application/octet-stream';
     const actualLength = response.headers.get('content-length');
+    const fileSizeFromHeader = actualLength ? parseInt(actualLength, 10) : null;
 
-    // Extract filename
+    if (fileSizeFromHeader && fileSizeFromHeader > MAX_URL_UPLOAD_BYTES) {
+      response.body?.cancel();
+      return new Response(JSON.stringify({ error: 'File exceeds 1GB upload limit' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const contentDisposition = response.headers.get('content-disposition');
     let fileName = 'downloaded-file';
+
     if (contentDisposition) {
       const match = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
       if (match) fileName = match[1].replace(/['"]/g, '');
@@ -62,16 +97,24 @@ Deno.serve(async (req) => {
           const lastSegment = decodeURIComponent(segments[segments.length - 1]);
           if (lastSegment.includes('.')) fileName = lastSegment;
         }
-      } catch { /* keep default */ }
+      } catch {
+        // ignore
+      }
     }
 
-    // Add extension from content-type if missing
     if (!fileName.includes('.')) {
       const extMap: Record<string, string> = {
-        'video/mp4': 'mp4', 'video/webm': 'webm', 'video/quicktime': 'mov',
-        'image/png': 'png', 'image/jpeg': 'jpg', 'image/gif': 'gif', 'image/webp': 'webp',
-        'application/pdf': 'pdf', 'application/zip': 'zip',
-        'audio/mpeg': 'mp3', 'audio/wav': 'wav',
+        'video/mp4': 'mp4',
+        'video/webm': 'webm',
+        'video/quicktime': 'mov',
+        'image/png': 'png',
+        'image/jpeg': 'jpg',
+        'image/gif': 'gif',
+        'image/webp': 'webp',
+        'application/pdf': 'pdf',
+        'application/zip': 'zip',
+        'audio/mpeg': 'mp3',
+        'audio/wav': 'wav',
         'application/octet-stream': 'bin',
       };
       const ext = extMap[contentType.split(';')[0].trim()] || 'bin';
@@ -81,21 +124,23 @@ Deno.serve(async (req) => {
     const ext = fileName.split('.').pop() || 'bin';
     const storagePath = `${shortId}.${ext}`;
 
-    // Stream upload directly to Supabase Storage using REST API
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-
     const storageUploadUrl = `${supabaseUrl}/storage/v1/object/uploads/${storagePath}`;
+
+    if (!response.body) {
+      throw new Error('Remote response has no body');
+    }
 
     const uploadRes = await fetch(storageUploadUrl, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${serviceRoleKey}`,
+        Authorization: `Bearer ${serviceRoleKey}`,
         'Content-Type': contentType,
         'Cache-Control': 'max-age=3600',
         'x-upsert': 'false',
       },
-      body: response.body, // Stream directly - no buffering!
+      body: response.body,
     });
 
     if (!uploadRes.ok) {
@@ -103,10 +148,8 @@ Deno.serve(async (req) => {
       throw new Error(`Storage upload failed: ${uploadRes.status} ${errText}`);
     }
 
-    // Determine file size
-    const fileSize = actualLength ? parseInt(actualLength, 10) : 0;
+    const fileSize = fileSizeFromHeader ?? 0;
 
-    // Force 1-hour expiry for files >50MB
     let finalExpireAt = expireAt;
     if (fileSize > 50 * 1024 * 1024) {
       const oneHourFromNow = new Date(Date.now() + 60 * 60 * 1000).toISOString();
@@ -115,9 +158,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Create database record
     const supabase = createClient(supabaseUrl, serviceRoleKey);
-
     const { data: uploadRecord, error: dbError } = await supabase
       .from('uploads')
       .insert({
@@ -140,7 +181,8 @@ Deno.serve(async (req) => {
     });
   } catch (error) {
     console.error('Upload from URL error:', error);
-    return new Response(JSON.stringify({ error: error.message || 'Internal server error' }), {
+    const message = error instanceof Error ? error.message : 'Internal server error';
+    return new Response(JSON.stringify({ error: message }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
