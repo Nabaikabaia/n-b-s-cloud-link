@@ -202,7 +202,15 @@ Deno.serve(async (req) => {
 
     if (dbError) throw dbError;
 
-    return new Response(JSON.stringify(uploadRecord), {
+    // Build the download URL
+    const origin = req.headers.get('origin') || req.headers.get('referer')?.replace(/\/$/, '') || '';
+    const identifier = uploadRecord.custom_name || uploadRecord.short_id;
+    const downloadUrl = origin ? `${origin}/${identifier}` : `/${identifier}`;
+
+    return new Response(JSON.stringify({
+      ...uploadRecord,
+      download_url: downloadUrl,
+    }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

@@ -6,6 +6,9 @@ services:
     staticPublishPath: ./dist
     routes:
       - type: rewrite
+        source: /api/upload
+        destination: https://aqrmhkzrrmpljrtknrpi.supabase.co/functions/v1/upload-from-url
+      - type: rewrite
         source: /api/upload-from-url
         destination: https://aqrmhkzrrmpljrtknrpi.supabase.co/functions/v1/upload-from-url
       - type: rewrite
