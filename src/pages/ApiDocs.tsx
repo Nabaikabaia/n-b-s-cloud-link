@@ -502,7 +502,7 @@ console.log("Download:", "${baseUrl}/" + (data.custom_name || data.short_id));`}
                 <CodeBlock id="py-url" code={`import requests
 
 res = requests.post(
-    "${functionsUrl}/upload-from-url",
+    "${apiUrl}/upload-from-url",
     json={
         "url": "https://example.com/video.mp4",
         "shortId": "MyVid123",
