@@ -87,12 +87,11 @@ const ApiDocs = () => {
     }
   };
 
-  const buildBrowserUrl = (url: string, shortId?: string, customName?: string) => {
+  const buildBrowserUrl = (url: string, customName?: string) => {
     const params = new URLSearchParams();
     params.set("url", url);
-    if (shortId) params.set("shortId", shortId);
     if (customName) params.set("customName", customName);
-    return `${apiUrl}/upload-from-url?${params.toString()}`;
+    return `${apiUrl}/upload?${params.toString()}`;
   };
 
   return (
