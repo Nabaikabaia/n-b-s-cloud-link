@@ -7,12 +7,20 @@ const browserHeaders = (url: string, withReferer = false) => {
   const parsed = new URL(url);
   return {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
-    'Accept': '*/*',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
     'Accept-Language': 'en-US,en;q=0.9',
+    'Accept-Encoding': 'gzip, deflate, br',
+    'Connection': 'keep-alive',
+    'Sec-Fetch-Dest': 'document',
+    'Sec-Fetch-Mode': 'navigate',
+    'Sec-Fetch-Site': 'none',
+    'Sec-Fetch-User': '?1',
+    'Upgrade-Insecure-Requests': '1',
     ...(withReferer
       ? {
           'Origin': `${parsed.protocol}//${parsed.host}`,
           'Referer': `${parsed.protocol}//${parsed.host}/`,
+          'Sec-Fetch-Site': 'same-origin',
         }
       : {}),
   };
@@ -20,29 +28,37 @@ const browserHeaders = (url: string, withReferer = false) => {
 
 // Try multiple strategies to get file metadata without downloading the whole file
 async function getFileInfo(url: string) {
+  const errors: string[] = [];
+
   // Strategy 1: HEAD request (cheapest)
   for (const withReferer of [false, true]) {
     const res = await fetch(url, {
       method: 'HEAD',
       headers: browserHeaders(url, withReferer),
       redirect: 'follow',
-    }).catch(() => null);
-    if (res && res.ok) return res;
+    }).catch((e) => { errors.push(`HEAD(ref=${withReferer}): ${e.message}`); return null; });
+    if (res && res.ok) return { response: res, errors };
+    if (res) {
+      const body = await res.text().catch(() => '');
+      errors.push(`HEAD(ref=${withReferer}): ${res.status} ${res.statusText} - ${body.slice(0, 200)}`);
+    }
   }
 
-  // Strategy 2: GET request (cancel body immediately after reading headers)
-  for (const withReferer of [false, true]) {
+  // Strategy 2: GET request (most compatible)
+  for (const withReferer of [true, false]) {
     const res = await fetch(url, {
       method: 'GET',
       headers: browserHeaders(url, withReferer),
       redirect: 'follow',
-    }).catch(() => null);
-    if (res && res.ok) return res;
-    if (res && res.status !== 403) return res; // non-403 error, return as-is
-    res?.body?.cancel();
+    }).catch((e) => { errors.push(`GET(ref=${withReferer}): ${e.message}`); return null; });
+    if (res && res.ok) return { response: res, errors };
+    if (res) {
+      const body = await res.text().catch(() => '');
+      errors.push(`GET(ref=${withReferer}): ${res.status} ${res.statusText} - ${body.slice(0, 200)}`);
+    }
   }
 
-  return null;
+  return { response: null, errors };
 }
 
 Deno.serve(async (req) => {
@@ -59,13 +75,15 @@ Deno.serve(async (req) => {
       });
     }
 
-    const response = await getFileInfo(url);
+    const result = await getFileInfo(url);
+    const response = result.response;
 
     if (!response || !response.ok) {
+      console.error('All fetch strategies failed:', result.errors);
       const status = response?.status || 'unknown';
       const statusText = response?.statusText || 'Could not reach URL';
       return new Response(
-        JSON.stringify({ error: `Failed to fetch URL metadata: ${status} ${statusText}` }),
+        JSON.stringify({ error: `Failed to fetch URL metadata: ${status} ${statusText}`, details: result.errors }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
       );
     }
