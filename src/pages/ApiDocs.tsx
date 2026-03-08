@@ -58,43 +58,26 @@ const ApiDocs = () => {
     const url = testUrl.trim();
     const name = testCustomName.trim() || null;
 
-    addTerminalLine('info', `$ Sending request to upload-from-url...`);
-    addTerminalLine('input', `POST ${apiUrl}/upload-from-url`);
-    addTerminalLine('input', `Body: { url: "${url}"${name ? `, customName: "${name}"` : ''} }`);
+    addTerminalLine('info', `$ Sending request to /api/upload...`);
+    addTerminalLine('input', `GET ${apiUrl}/upload?url=${encodeURIComponent(url)}${name ? `&customName=${name}` : ''}`);
 
     try {
-      // Check file first
-      addTerminalLine('info', '→ Checking file metadata...');
-      const { data: metaData, error: metaError } = await supabase.functions.invoke("check-url-file", {
-        body: { url },
-      });
-      if (metaError) throw new Error(metaError.message);
-      if (metaData?.error) throw new Error(metaData.error);
-
-      addTerminalLine('output', `✓ File: ${metaData?.fileName || 'unknown'} (${metaData?.contentType || 'unknown'}, ${metaData?.fileSize ? (metaData.fileSize / 1024 / 1024).toFixed(2) + ' MB' : 'unknown size'})`);
-
-      // Generate short ID
-      const { data: shortId, error: idError } = await supabase.rpc("generate_short_id");
-      if (idError) throw idError;
-      addTerminalLine('info', `→ Generated short ID: ${shortId}`);
-
-      // Upload
+      // Simple single request — server handles everything
       addTerminalLine('info', '→ Uploading file...');
-      const expireAt = new Date(Date.now() + 60 * 60 * 1000).toISOString();
       const { data, error } = await supabase.functions.invoke("upload-from-url", {
-        body: { url, shortId, expireAt, customName: name },
+        body: { url, customName: name },
       });
       if (error) throw new Error(error.message);
       if (data?.error) throw new Error(data.error);
 
-      const link = `${baseUrl}/${data.custom_name || data.short_id}`;
-      const fullJson = { upload: data, metadata: metaData, download_url: link };
+      const link = data.download_url || `${baseUrl}/${data.custom_name || data.short_id}`;
 
       addTerminalLine('output', `✓ Upload complete!`);
+      addTerminalLine('output', `→ File: ${data.file_name} (${data.file_type})`);
       addTerminalLine('output', `→ Download: ${link}`);
-      addTerminalLine('output', `→ Expires: ${new Date(data.expire_at).toLocaleString()}`);
+      if (data.expire_at) addTerminalLine('output', `→ Expires: ${new Date(data.expire_at).toLocaleString()}`);
 
-      setTestResult({ success: true, link, fileName: data.file_name, size: metaData?.fileSize, type: data.file_type, expires: data.expire_at, json: fullJson });
+      setTestResult({ success: true, link, fileName: data.file_name, size: data.file_size, type: data.file_type, expires: data.expire_at, json: data });
       toast.success("Upload successful!");
     } catch (err: any) {
       addTerminalLine('error', `✗ Error: ${err.message}`);
