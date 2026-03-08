@@ -409,7 +409,7 @@ const ApiDocs = () => {
                 <span className="px-1.5 py-0.5 rounded bg-success/10 text-success font-semibold">Link</span>
               </div>
 
-              <CodeBlock id="opt2" code={`curl -X POST ${functionsUrl}/upload-from-url \\
+              <CodeBlock id="opt2" code={`curl -X POST ${apiUrl}/upload-from-url \\
   -H "Content-Type: application/json" \\
   -d '{
     "url": "https://example.com/video.mp4",
