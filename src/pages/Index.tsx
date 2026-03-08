@@ -172,7 +172,7 @@ const Index = () => {
 
         {/* Main upload area */}
         <div className="max-w-4xl mx-auto space-y-6 sm:space-y-8">
-          {!selectedFile && !currentUpload && uploadMode === 'file' && !isUploading && (
+          {!selectedFile && !currentUpload && !isUploading && (
             <div className="animate-fade-in space-y-4">
               {/* Mode toggle */}
               <div className="flex items-center justify-center gap-2">
@@ -195,11 +195,14 @@ const Index = () => {
                   From URL
                 </Button>
               </div>
-              <UploadZone onFileSelect={handleFileSelect} isUploading={false} />
+
+              {uploadMode === 'file' && (
+                <UploadZone onFileSelect={handleFileSelect} isUploading={false} />
+              )}
             </div>
           )}
 
-          {!selectedFile && !currentUpload && uploadMode === 'url' && !isUploading && (
+          {!selectedFile && !currentUpload && !isUploading && uploadMode === 'url' && (
             <div className="animate-fade-in space-y-4">
               {/* Mode toggle */}
               <div className="flex items-center justify-center gap-2">
