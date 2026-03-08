@@ -38,11 +38,13 @@ async function getFileInfo(url: string) {
       redirect: 'follow',
     }).catch((e) => { errors.push(`HEAD(ref=${withReferer}): ${e.message}`); return null; });
     if (res && res.ok) return { response: res, errors };
-    if (res) { errors.push(`HEAD(ref=${withReferer}): ${res.status} ${res.statusText}`); }
-    res?.body?.cancel();
+    if (res) {
+      const body = await res.text().catch(() => '');
+      errors.push(`HEAD(ref=${withReferer}): ${res.status} ${res.statusText} - ${body.slice(0, 200)}`);
+    }
   }
 
-  // Strategy 2: GET request with referer (most compatible)
+  // Strategy 2: GET request (most compatible)
   for (const withReferer of [true, false]) {
     const res = await fetch(url, {
       method: 'GET',
@@ -50,8 +52,10 @@ async function getFileInfo(url: string) {
       redirect: 'follow',
     }).catch((e) => { errors.push(`GET(ref=${withReferer}): ${e.message}`); return null; });
     if (res && res.ok) return { response: res, errors };
-    if (res) { errors.push(`GET(ref=${withReferer}): ${res.status} ${res.statusText}`); }
-    res?.body?.cancel();
+    if (res) {
+      const body = await res.text().catch(() => '');
+      errors.push(`GET(ref=${withReferer}): ${res.status} ${res.statusText} - ${body.slice(0, 200)}`);
+    }
   }
 
   return { response: null, errors };
