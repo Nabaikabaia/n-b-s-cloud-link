@@ -71,8 +71,14 @@ Deno.serve(async (req) => {
       );
     }
 
+    const contentRange = response.headers.get('content-range');
     const cl = response.headers.get('content-length');
-    if (cl) contentLength = parseInt(cl, 10);
+    if (contentRange && contentRange.includes('/')) {
+      const totalSize = Number(contentRange.split('/').pop());
+      if (Number.isFinite(totalSize) && totalSize > 0) contentLength = totalSize;
+    } else if (cl) {
+      contentLength = parseInt(cl, 10);
+    }
     contentType = response.headers.get('content-type') || contentType;
 
     const cd = response.headers.get('content-disposition');
