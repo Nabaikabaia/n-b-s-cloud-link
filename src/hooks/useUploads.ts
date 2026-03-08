@@ -199,6 +199,7 @@ export const useUploads = () => {
     uploads,
     isLoading,
     uploadFile,
+    uploadFromUrl,
     deleteUpload,
     getPublicUrl,
     fetchUploads,
