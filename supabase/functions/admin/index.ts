@@ -25,10 +25,26 @@ Deno.serve(async (req) => {
     const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
-    const url = new URL(req.url);
-    const action = url.searchParams.get('action') || 'stats';
+    let body: any = {};
+    try { body = await req.json(); } catch {}
 
-    if (action === 'stats') {
+    // If body has id, it's a delete request
+    if (body?.id) {
+      const { id, storagePath } = body;
+
+      if (storagePath) {
+        await supabase.storage.from('uploads').remove([storagePath]);
+      }
+      const { error } = await supabase.from('uploads').delete().eq('id', id);
+      if (error) throw error;
+
+      return new Response(JSON.stringify({ success: true }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Otherwise return stats
+    {
       // Get all uploads for stats
       const { data: uploads, error } = await supabase
         .from('uploads')
@@ -89,26 +105,6 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
-
-    if (action === 'delete') {
-      const body = await req.json();
-      const { id, storagePath } = body;
-
-      if (storagePath) {
-        await supabase.storage.from('uploads').remove([storagePath]);
-      }
-      const { error } = await supabase.from('uploads').delete().eq('id', id);
-      if (error) throw error;
-
-      return new Response(JSON.stringify({ success: true }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    return new Response(JSON.stringify({ error: 'Unknown action' }), {
-      status: 400,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
   } catch (error) {
     console.error('Admin error:', error);
     return new Response(JSON.stringify({ error: error instanceof Error ? error.message : 'Internal error' }), {
