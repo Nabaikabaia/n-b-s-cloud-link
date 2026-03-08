@@ -47,7 +47,24 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { url, shortId, expireAt, customName } = await req.json();
+    let url: string | undefined;
+    let shortId: string | undefined;
+    let expireAt: string | undefined;
+    let customName: string | undefined;
+
+    if (req.method === 'GET') {
+      const params = new URL(req.url).searchParams;
+      url = params.get('url') || undefined;
+      shortId = params.get('shortId') || undefined;
+      expireAt = params.get('expireAt') || undefined;
+      customName = params.get('customName') || undefined;
+    } else {
+      const body = await req.json();
+      url = body.url;
+      shortId = body.shortId;
+      expireAt = body.expireAt;
+      customName = body.customName;
+    }
 
     if (!url || !shortId) {
       return new Response(JSON.stringify({ error: 'url and shortId are required' }), {
