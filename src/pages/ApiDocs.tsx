@@ -4,7 +4,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import HamburgerMenu from "@/components/HamburgerMenu";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Code, Copy, Check, Home, Play, Loader2, ArrowRight, FileUp, Globe, Download, AlertTriangle, Braces } from "lucide-react";
+import { Code, Copy, Check, Home, Play, Loader2, ArrowRight, FileUp, Globe, Download, AlertTriangle, Braces, ExternalLink } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -57,7 +57,8 @@ const ApiDocs = () => {
       if (data?.error) throw new Error(data.error);
 
       const link = `${baseUrl}/${data.custom_name || data.short_id}`;
-      setTestResult({ success: true, link, fileName: data.file_name, size: metaData?.fileSize, type: data.file_type, expires: data.expire_at });
+      const fullJson = { upload: data, metadata: metaData, download_url: link };
+      setTestResult({ success: true, link, fileName: data.file_name, size: metaData?.fileSize, type: data.file_type, expires: data.expire_at, json: fullJson });
       toast.success("Upload successful!");
     } catch (err: any) {
       setTestResult({ success: false, error: err.message });
@@ -358,7 +359,7 @@ console.log("Download link:", "${baseUrl}/" + (data.custom_name || data.short_id
               </Button>
 
               {testResult && (
-                <div className={`rounded-lg p-4 text-sm space-y-1 ${testResult.success ? "bg-muted/80 border border-primary/30" : "bg-destructive/10 border border-destructive/30"}`}>
+                <div className={`rounded-lg p-4 text-sm space-y-2 ${testResult.success ? "bg-muted/80 border border-primary/30" : "bg-destructive/10 border border-destructive/30"}`}>
                   {testResult.success ? (
                     <>
                       <p className="font-semibold text-primary">✅ Done!</p>
@@ -370,11 +371,47 @@ console.log("Download link:", "${baseUrl}/" + (data.custom_name || data.short_id
                         <a href={testResult.link} target="_blank" rel="noopener noreferrer" className="text-primary underline text-xs break-all flex-1">{testResult.link}</a>
                         <CopyBtn id="result-link" text={testResult.link} />
                       </div>
+                      <div className="flex gap-2 mt-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-xs"
+                          onClick={() => {
+                            const blob = new Blob([JSON.stringify(testResult.json, null, 2)], { type: "application/json" });
+                            window.open(URL.createObjectURL(blob), "_blank");
+                          }}
+                        >
+                          <ExternalLink className="h-3 w-3 mr-1" /> View JSON in Browser
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-xs"
+                          onClick={() => copy(JSON.stringify(testResult.json, null, 2), "json-raw")}
+                        >
+                          {copiedSection === "json-raw" ? <Check className="h-3 w-3 mr-1" /> : <Copy className="h-3 w-3 mr-1" />} Copy JSON
+                        </Button>
+                      </div>
+                      <details className="mt-2">
+                        <summary className="text-xs font-medium text-muted-foreground cursor-pointer hover:text-foreground">▸ Raw JSON Response</summary>
+                        <pre className="mt-1 bg-muted rounded-lg p-3 text-xs overflow-x-auto whitespace-pre-wrap max-h-64 overflow-y-auto">{JSON.stringify(testResult.json, null, 2)}</pre>
+                      </details>
                     </>
                   ) : (
                     <>
                       <p className="font-semibold text-destructive flex items-center gap-1"><AlertTriangle className="h-4 w-4" /> Failed</p>
                       <p className="text-xs text-muted-foreground">{testResult.error}</p>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-xs mt-1"
+                        onClick={() => {
+                          const blob = new Blob([JSON.stringify({ success: false, error: testResult.error }, null, 2)], { type: "application/json" });
+                          window.open(URL.createObjectURL(blob), "_blank");
+                        }}
+                      >
+                        <ExternalLink className="h-3 w-3 mr-1" /> View Error JSON
+                      </Button>
                     </>
                   )}
                 </div>
