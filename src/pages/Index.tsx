@@ -128,6 +128,7 @@ const Index = () => {
     setFilePreviewUrl('');
     setCustomName('');
     setUrlInput('');
+    setUrlFileInfo(null);
     setUploadMode('file');
   };
 
