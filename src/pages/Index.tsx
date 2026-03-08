@@ -1,6 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
-import { Link2 } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { Link2, Upload, Zap, Shield, History, Sparkles, Check, ArrowUp, HardDrive, AlertTriangle, Loader2, Copy, CheckCheck } from 'lucide-react';
 import ParticleBackground from '@/components/ParticleBackground';
 import UploadZone from '@/components/UploadZone';
 import UploadProgress from '@/components/UploadProgress';
@@ -13,15 +12,12 @@ import UploadHistory from '@/components/UploadHistory';
 import SnowfallEffect from '@/components/SnowfallEffect';
 import ChristmasModal from '@/components/ChristmasModal';
 import { Button } from '@/components/ui/button';
-import { Zap, Shield, History, Sparkles, Check, ArrowUp, Upload, HardDrive, AlertTriangle, Loader2, Copy, CheckCheck } from 'lucide-react';
-import crystalOrb from '@/assets/crystal-orb.png';
 import { useUploads } from '@/hooks/useUploads';
 import { useChristmasTheme } from '@/hooks/useChristmasTheme';
 
 const Index = () => {
-  const navigate = useNavigate();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [filePreviewUrl, setFilePreviewUrl] = useState<string>('');
+  const [filePreviewUrl, setFilePreviewUrl] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   const [currentUpload, setCurrentUpload] = useState<any>(null);
   const [expiration, setExpiration] = useState('24h');
@@ -33,37 +29,29 @@ const Index = () => {
   const [urlFileInfo, setUrlFileInfo] = useState<{ fileSize: number | null; contentType: string; fileName: string } | null>(null);
   const [isCheckingUrl, setIsCheckingUrl] = useState(false);
   const [copiedBaseUrl, setCopiedBaseUrl] = useState(false);
-  
+
   const { uploads, uploadFile, uploadFromUrl, deleteUpload, getPublicUrl, isLoading } = useUploads();
   const { isChristmasDay } = useChristmasTheme();
 
-  // Scroll to top button visibility
   useEffect(() => {
-    const handleScroll = () => {
-      setShowScrollTop(window.scrollY > 300);
-    };
+    const handleScroll = () => setShowScrollTop(window.scrollY > 300);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Check URL file info with debounce
   useEffect(() => {
     setUrlFileInfo(null);
     if (!urlInput.trim() || uploadMode !== 'url') return;
-    
     try { new URL(urlInput.trim()); } catch { return; }
-
     setIsCheckingUrl(true);
     const timer = setTimeout(async () => {
       try {
         const { supabase } = await import('@/integrations/supabase/client');
-        const { data, error } = await supabase
-          .functions.invoke('check-url-file', { body: { url: urlInput.trim() } });
+        const { data, error } = await supabase.functions.invoke('check-url-file', { body: { url: urlInput.trim() } });
         if (!error && data) setUrlFileInfo(data);
       } catch { /* ignore */ }
       setIsCheckingUrl(false);
     }, 600);
-
     return () => { clearTimeout(timer); setIsCheckingUrl(false); };
   }, [urlInput, uploadMode]);
 
@@ -74,20 +62,12 @@ const Index = () => {
     return `${bytes} B`;
   };
 
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
   const handleFileSelect = (file: File) => {
     setSelectedFile(file);
     setCurrentUpload(null);
-    
-    // Generate preview for images
     if (file.type.startsWith('image/')) {
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setFilePreviewUrl(reader.result as string);
-      };
+      reader.onloadend = () => setFilePreviewUrl(reader.result as string);
       reader.readAsDataURL(file);
     } else {
       setFilePreviewUrl('');
@@ -96,7 +76,6 @@ const Index = () => {
 
   const handleUpload = async () => {
     if (!selectedFile) return;
-
     setIsUploading(true);
     try {
       const upload = await uploadFile(selectedFile, expiration, customName.trim() || undefined);
@@ -110,7 +89,6 @@ const Index = () => {
 
   const handleUrlUpload = async () => {
     if (!urlInput.trim()) return;
-
     setIsUploading(true);
     try {
       const upload = await uploadFromUrl(urlInput.trim(), expiration, customName.trim() || undefined);
@@ -135,115 +113,103 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden">
-      {/* Christmas Effects - Only on Dec 25 */}
+    <div className="min-h-screen relative">
       {isChristmasDay && <SnowfallEffect />}
       {isChristmasDay && <ChristmasModal />}
-      
       <ParticleBackground />
-      
-      <div className="fixed top-4 left-4 z-[100] pointer-events-auto">
-        <HamburgerMenu />
-      </div>
-      <div className="fixed top-4 right-4 z-[100] pointer-events-auto">
-        <ThemeToggle />
-      </div>
 
-      {/* Scroll to top button */}
+      {/* Top bar */}
+      <div className="fixed top-4 left-4 z-[100]"><HamburgerMenu /></div>
+      <div className="fixed top-4 right-4 z-[100]"><ThemeToggle /></div>
+
+      {/* Scroll to top */}
       <button
-        onClick={scrollToTop}
-        className={`fixed bottom-6 right-6 z-[100] p-3 rounded-full glass-strong border border-primary/30 hover:border-primary hover:glow-cyan transition-all duration-300 ${
+        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        className={`fixed bottom-6 right-6 z-[100] p-2.5 rounded-full bg-card border border-border hover:border-primary/50 transition-all duration-300 ${
           showScrollTop ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
         }`}
-        aria-label="Scroll to top"
       >
-        <ArrowUp className="h-5 w-5 text-primary" />
+        <ArrowUp className="h-4 w-4 text-foreground" />
       </button>
 
-      {/* Main content */}
-      <div className="relative z-10 container mx-auto px-4 py-8 sm:py-12">
+      {/* Main */}
+      <div className="relative z-10 container mx-auto px-4 py-16 sm:py-24 max-w-2xl">
         {/* Header */}
-        <header className="text-center mb-10 sm:mb-16 space-y-4 sm:space-y-6 animate-fade-in">
-          <div className="flex items-center justify-center gap-4 mb-4 sm:mb-6">
-            <img 
-              src={crystalOrb} 
-              alt="Nãbēēs Crystal Orb" 
-              className="w-12 h-12 sm:w-16 sm:h-16 animate-spin-slow float"
-            />
+        <header className="text-center mb-12 sm:mb-16 space-y-4 animate-fade-in">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-medium text-primary">
+            <Zap className="w-3 h-3" />
+            Instant File Sharing
           </div>
-          
-          <h1 className={`text-4xl sm:text-6xl md:text-7xl font-bold gradient-text mb-2 sm:mb-4 tracking-tight ${isChristmasDay ? 'christmas-glow' : ''}`}>
-            {isChristmasDay ? '🎄 Nãbēēs Uploader 🎄' : 'Nãbēēs Uploader'}
+
+          <h1 className={`text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-foreground ${isChristmasDay ? 'christmas-glow' : ''}`}>
+            {isChristmasDay ? '🎄 Nãbēēs' : 'Nãbēēs'}
+            <span className="block gradient-text">Uploader</span>
           </h1>
-          
-          <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto px-4">
-            {isChristmasDay ? '🎁 Your File, One Link, Zero Stress - Merry Christmas! 🎅' : 'Your File, One Link, Zero Stress'}
+
+          <p className="text-base sm:text-lg text-muted-foreground max-w-md mx-auto">
+            {isChristmasDay ? '🎁 Your File, One Link, Zero Stress 🎅' : 'Your file, one link, zero stress.'}
           </p>
-          
-          <div className="flex items-center justify-center gap-4 sm:gap-6 text-sm text-muted-foreground flex-wrap px-4">
-            <div className="flex items-center gap-2 transition-transform hover:scale-105">
-              <Zap className="w-4 h-4 text-primary" />
-              <span>Instant Upload</span>
+
+          <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground pt-2">
+            <div className="flex items-center gap-1.5">
+              <Shield className="w-3.5 h-3.5 text-success" />
+              <span>Encrypted</span>
             </div>
-            <div className="flex items-center gap-2 transition-transform hover:scale-105">
-              <Shield className="w-4 h-4 text-success" />
-              <span>Secure Cloud</span>
+            <div className="w-1 h-1 rounded-full bg-border" />
+            <div className="flex items-center gap-1.5">
+              <Zap className="w-3.5 h-3.5 text-primary" />
+              <span>Fast</span>
             </div>
             {uploads.length > 0 && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowHistory(!showHistory)}
-                className="text-muted-foreground hover:text-primary transition-all hover:scale-105"
-              >
-                <History className="w-4 h-4 mr-2" />
-                History ({uploads.length})
-              </Button>
+              <>
+                <div className="w-1 h-1 rounded-full bg-border" />
+                <button onClick={() => setShowHistory(!showHistory)} className="flex items-center gap-1.5 hover:text-primary transition-colors">
+                  <History className="w-3.5 h-3.5" />
+                  <span>History ({uploads.length})</span>
+                </button>
+              </>
             )}
           </div>
         </header>
 
-        {/* Main upload area */}
-        <div className="max-w-4xl mx-auto space-y-6 sm:space-y-8">
+        {/* Upload Area */}
+        <div className="space-y-5">
           {!selectedFile && !currentUpload && !isUploading && (
-            <div className="animate-fade-in space-y-4">
+            <div className="space-y-5 animate-fade-in">
               {/* Mode toggle */}
-              <div className="flex items-center justify-center gap-2">
-                <Button
-                  variant={uploadMode === 'file' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setUploadMode('file')}
-                  className="transition-all"
-                >
-                  <Upload className="w-4 h-4 mr-1" />
-                  From Device
-                </Button>
-                <Button
-                  variant={uploadMode === 'url' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setUploadMode('url')}
-                  className="transition-all"
-                >
-                  <Link2 className="w-4 h-4 mr-1" />
-                  From URL
-                </Button>
+              <div className="flex items-center justify-center">
+                <div className="inline-flex rounded-xl bg-muted/50 p-1 border border-border">
+                  <button
+                    onClick={() => setUploadMode('file')}
+                    className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                      uploadMode === 'file' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    <Upload className="w-3.5 h-3.5" />
+                    File
+                  </button>
+                  <button
+                    onClick={() => setUploadMode('url')}
+                    className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                      uploadMode === 'url' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    <Link2 className="w-3.5 h-3.5" />
+                    URL
+                  </button>
+                </div>
               </div>
 
               {uploadMode === 'file' ? (
                 <UploadZone onFileSelect={handleFileSelect} isUploading={false} />
               ) : (
-                <div className="glass-strong rounded-3xl p-8 sm:p-12 border-2 border-border space-y-6">
+                <div className="rounded-2xl bg-card border border-border p-6 sm:p-8 space-y-5">
                   <div className="text-center space-y-2">
-                    <div className="relative mx-auto w-fit">
-                      <div className="absolute inset-0 rounded-full bg-primary/20 blur-2xl animate-pulse-glow" />
-                      <div className="relative p-6 sm:p-8 rounded-full glass border border-primary/50">
-                        <Link2 size={40} className="sm:w-12 sm:h-12 text-primary" />
-                      </div>
+                    <div className="inline-flex p-4 rounded-2xl bg-muted/60">
+                      <Link2 size={32} className="text-primary" />
                     </div>
-                    <h3 className="text-xl sm:text-2xl font-bold gradient-text mt-4">Paste a URL</h3>
-                    <p className="text-muted-foreground text-sm sm:text-base">
-                      Enter a direct link to any file on the web
-                    </p>
+                    <h3 className="text-lg font-semibold text-foreground">Upload from URL</h3>
+                    <p className="text-sm text-muted-foreground">Paste a direct link to any file</p>
                   </div>
 
                   <input
@@ -251,84 +217,79 @@ const Index = () => {
                     value={urlInput}
                     onChange={(e) => setUrlInput(e.target.value)}
                     placeholder="https://example.com/file.pdf"
-                    className="w-full px-4 py-3 rounded-lg glass border border-primary/30 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all text-foreground placeholder:text-muted-foreground"
+                    className="w-full px-4 py-3 rounded-xl bg-muted/30 border border-border focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-foreground placeholder:text-muted-foreground text-sm"
                   />
 
-                  {/* Base upload URL - shown after URL is pasted */}
+                  {/* Base URL copy */}
                   {urlInput.trim() && (
-                    <div className="flex items-center gap-2 glass rounded-lg px-4 py-2.5 border border-primary/20 animate-fade-in">
-                      <span className="text-xs text-muted-foreground shrink-0">Your file will be at:</span>
+                    <div className="flex items-center gap-2 rounded-xl bg-muted/30 border border-border px-4 py-2.5 animate-fade-in">
+                      <span className="text-xs text-muted-foreground shrink-0">Link preview:</span>
                       <code className="text-xs font-mono text-primary truncate flex-1">
-                        {`${window.location.origin}/${customName || '<short-id>'}`}
+                        {`${window.location.origin}/${customName || '<id>'}`}
                       </code>
                       <button
                         onClick={() => {
-                          const baseUrl = `${window.location.origin}/`;
-                          navigator.clipboard.writeText(baseUrl);
+                          navigator.clipboard.writeText(`${window.location.origin}/`);
                           setCopiedBaseUrl(true);
                           setTimeout(() => setCopiedBaseUrl(false), 2000);
                         }}
-                        className="shrink-0 p-1.5 rounded-md hover:bg-primary/10 transition-colors"
+                        className="shrink-0 p-1 rounded-md hover:bg-primary/10 transition-colors"
                         title="Copy base URL"
                       >
-                        {copiedBaseUrl ? (
-                          <CheckCheck className="h-3.5 w-3.5 text-success" />
-                        ) : (
-                          <Copy className="h-3.5 w-3.5 text-muted-foreground hover:text-primary" />
-                        )}
+                        {copiedBaseUrl ? <CheckCheck className="h-3.5 w-3.5 text-success" /> : <Copy className="h-3.5 w-3.5 text-muted-foreground" />}
                       </button>
                     </div>
                   )}
 
-                  {/* File info display */}
+                  {/* File info */}
                   {isCheckingUrl && (
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground animate-fade-in">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                      Checking file info...
+                      Checking file...
                     </div>
                   )}
                   {urlFileInfo && !isCheckingUrl && (
-                    <div className="glass rounded-xl p-4 border border-primary/20 space-y-2 animate-fade-in">
+                    <div className="rounded-xl bg-muted/30 border border-border p-4 space-y-2 animate-fade-in">
                       <div className="flex items-center gap-2 text-sm font-medium text-foreground">
                         <HardDrive className="h-4 w-4 text-primary" />
                         File Details
                       </div>
-                      <div className="grid grid-cols-2 gap-2 text-sm">
-                        <div className="text-muted-foreground">Name:</div>
-                        <div className="text-foreground truncate font-medium">{urlFileInfo.fileName}</div>
-                        <div className="text-muted-foreground">Size:</div>
-                        <div className="text-foreground font-medium">
-                          {urlFileInfo.fileSize ? formatFileSize(urlFileInfo.fileSize) : 'Unknown'}
-                        </div>
-                        <div className="text-muted-foreground">Type:</div>
-                        <div className="text-foreground font-medium">{urlFileInfo.contentType}</div>
+                      <div className="grid grid-cols-2 gap-1.5 text-xs">
+                        <span className="text-muted-foreground">Name</span>
+                        <span className="text-foreground truncate font-medium">{urlFileInfo.fileName}</span>
+                        <span className="text-muted-foreground">Size</span>
+                        <span className="text-foreground font-medium">{urlFileInfo.fileSize ? formatFileSize(urlFileInfo.fileSize) : 'Unknown'}</span>
+                        <span className="text-muted-foreground">Type</span>
+                        <span className="text-foreground font-medium">{urlFileInfo.contentType}</span>
                       </div>
                       {urlFileInfo.fileSize && urlFileInfo.fileSize > 50 * 1024 * 1024 && (
-                        <div className="flex items-center gap-2 text-xs text-destructive mt-2">
+                        <div className="flex items-center gap-1.5 text-xs text-destructive mt-1">
                           <AlertTriangle className="h-3.5 w-3.5" />
                           Large file — will auto-expire after 1 hour
                         </div>
                       )}
                     </div>
                   )}
-                  <div className="glass-strong rounded-xl p-4 sm:p-6 space-y-3 border border-primary/20 transition-all hover:border-primary/40">
-                    <label htmlFor="url-custom-name" className="text-sm font-semibold text-foreground flex items-center gap-2">
-                      <Sparkles className="h-4 w-4 text-accent" />
-                      Custom Link Name (Optional)
+
+                  {/* Custom name */}
+                  <div className="space-y-2">
+                    <label htmlFor="url-custom-name" className="text-sm font-medium text-foreground flex items-center gap-1.5">
+                      <Sparkles className="h-3.5 w-3.5 text-primary" />
+                      Custom name <span className="text-muted-foreground font-normal">(optional)</span>
                     </label>
                     <input
                       id="url-custom-name"
                       type="text"
                       value={customName}
                       onChange={(e) => setCustomName(e.target.value)}
-                      placeholder="e.g., My Awesome Document"
-                      className="w-full px-4 py-3 rounded-lg glass border border-primary/30 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all text-foreground placeholder:text-muted-foreground"
+                      placeholder="e.g., my-document"
+                      className="w-full px-4 py-3 rounded-xl bg-muted/30 border border-border focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-foreground placeholder:text-muted-foreground text-sm"
                       maxLength={100}
                     />
                     {customName && (
-                      <p className="text-xs text-muted-foreground flex items-center gap-1 animate-fade-in">
+                      <p className="text-xs text-muted-foreground flex items-center gap-1">
                         <Check className="h-3 w-3 text-success" />
-                        Your link will display: <span className="font-semibold text-primary">"{customName}"</span>
+                        Link: <span className="font-medium text-primary">{window.location.origin}/{customName}</span>
                       </p>
                     )}
                   </div>
@@ -338,10 +299,9 @@ const Index = () => {
                   <Button
                     onClick={handleUrlUpload}
                     disabled={!urlInput.trim()}
-                    className="w-full py-5 sm:py-6 text-base sm:text-lg glass-strong border-2 border-primary hover:glow-cyan group relative overflow-hidden transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
+                    className="w-full py-5 text-sm font-semibold bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-40 rounded-xl"
                   >
-                    <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-secondary/20 to-accent/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
-                    <Link2 className="w-5 h-5 mr-2" />
+                    <Link2 className="w-4 h-4 mr-2" />
                     Fetch & Upload
                   </Button>
                 </div>
@@ -349,39 +309,35 @@ const Index = () => {
             </div>
           )}
 
+          {/* File selected */}
           {selectedFile && !isUploading && !currentUpload && (
-            <div className="space-y-4 sm:space-y-6 animate-fade-in">
+            <div className="space-y-5 animate-fade-in">
               <FilePreview file={selectedFile} previewUrl={filePreviewUrl} />
 
-              <div className="flex items-center justify-end">
-                <Button 
-                  variant="ghost" 
-                  onClick={handleReset} 
-                  size="sm"
-                  className="hover:text-destructive transition-colors"
-                >
-                  Change File
+              <div className="flex justify-end">
+                <Button variant="ghost" onClick={handleReset} size="sm" className="text-xs text-muted-foreground hover:text-destructive">
+                  Change file
                 </Button>
               </div>
 
-              <div className="glass-strong rounded-xl p-4 sm:p-6 space-y-3 border border-primary/20 transition-all hover:border-primary/40">
-                <label htmlFor="custom-name" className="text-sm font-semibold text-foreground flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-accent" />
-                  Custom Link Name (Optional)
+              <div className="space-y-2">
+                <label htmlFor="custom-name" className="text-sm font-medium text-foreground flex items-center gap-1.5">
+                  <Sparkles className="h-3.5 w-3.5 text-primary" />
+                  Custom name <span className="text-muted-foreground font-normal">(optional)</span>
                 </label>
                 <input
                   id="custom-name"
                   type="text"
                   value={customName}
                   onChange={(e) => setCustomName(e.target.value)}
-                  placeholder="e.g., My Awesome Document"
-                  className="w-full px-4 py-3 rounded-lg glass border border-primary/30 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all text-foreground placeholder:text-muted-foreground"
+                  placeholder="e.g., my-document"
+                  className="w-full px-4 py-3 rounded-xl bg-muted/30 border border-border focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-foreground placeholder:text-muted-foreground text-sm"
                   maxLength={100}
                 />
                 {customName && (
-                  <p className="text-xs text-muted-foreground flex items-center gap-1 animate-fade-in">
+                  <p className="text-xs text-muted-foreground flex items-center gap-1">
                     <Check className="h-3 w-3 text-success" />
-                    Your link will display: <span className="font-semibold text-primary">"{customName}"</span>
+                    Link: <span className="font-medium text-primary">{window.location.origin}/{customName}</span>
                   </p>
                 )}
               </div>
@@ -390,64 +346,48 @@ const Index = () => {
 
               <Button
                 onClick={handleUpload}
-                className="w-full py-5 sm:py-6 text-base sm:text-lg glass-strong border-2 border-primary hover:glow-cyan group relative overflow-hidden transition-all hover:scale-[1.02] active:scale-[0.98]"
+                className="w-full py-5 text-sm font-semibold bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl"
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-secondary/20 to-accent/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
-                <Zap className="w-5 h-5 mr-2" />
-                Upload & Generate URL
+                <Zap className="w-4 h-4 mr-2" />
+                Upload & Get Link
               </Button>
             </div>
           )}
 
+          {/* Uploading */}
           {isUploading && (selectedFile || uploadMode === 'url') && (
             <div className="animate-fade-in">
-              <UploadProgress 
-                fileName={selectedFile?.name || urlInput.split('/').pop() || 'Remote file'} 
-                fileSize={selectedFile?.size || 0} 
-              />
+              <UploadProgress fileName={selectedFile?.name || urlInput.split('/').pop() || 'Remote file'} fileSize={selectedFile?.size || 0} />
             </div>
           )}
 
+          {/* Result */}
           {currentUpload && (
-            <div className="space-y-4 sm:space-y-6 animate-fade-in">
-              <URLCard 
-                url={getPublicUrl(currentUpload.short_id, currentUpload.custom_name)} 
+            <div className="space-y-4 animate-fade-in">
+              <URLCard
+                url={getPublicUrl(currentUpload.short_id, currentUpload.custom_name)}
                 fileName={currentUpload.file_name}
                 customName={currentUpload.custom_name}
               />
-              
-              <Button
-                onClick={handleReset}
-                variant="outline"
-                className="w-full glass border-border hover:border-primary/50 transition-all hover:scale-[1.01] active:scale-[0.99]"
-              >
-                Upload Another File
+              <Button onClick={handleReset} variant="outline" className="w-full rounded-xl">
+                Upload Another
               </Button>
             </div>
           )}
 
+          {/* History */}
           {showHistory && uploads.length > 0 && (
             <div className="animate-fade-in">
-              <UploadHistory 
-                uploads={uploads}
-                onDelete={deleteUpload}
-                getPublicUrl={getPublicUrl}
-              />
+              <UploadHistory uploads={uploads} onDelete={deleteUpload} getPublicUrl={getPublicUrl} />
             </div>
           )}
         </div>
 
-        {/* Footer tagline */}
-        <footer className="mt-16 sm:mt-20 text-center animate-fade-in" style={{ animationDelay: '0.3s' }}>
-          <p className="text-sm text-muted-foreground">
-            Powered by Quantum Upload Engine v2.0
-          </p>
+        {/* Footer */}
+        <footer className="mt-20 text-center">
+          <p className="text-xs text-muted-foreground">Nãbēēs Uploader • Fast & Secure File Sharing</p>
         </footer>
       </div>
-
-      {/* Ambient glow effects */}
-      <div className="fixed top-0 left-0 w-64 sm:w-96 h-64 sm:h-96 bg-primary/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
-      <div className="fixed bottom-0 right-0 w-64 sm:w-96 h-64 sm:h-96 bg-secondary/10 rounded-full blur-3xl translate-x-1/2 translate-y-1/2 pointer-events-none" />
     </div>
   );
 };

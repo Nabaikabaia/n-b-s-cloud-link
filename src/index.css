@@ -1,119 +1,102 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
-
 @layer base {
   :root {
-    /* Light Mode - Clean & Modern */
-    --background: 210 40% 98%;
-    --foreground: 222 47% 11%;
+    /* Light Mode — Crisp Ivory + Deep Ink */
+    --background: 40 20% 97%;
+    --foreground: 240 10% 10%;
 
-    /* Light Cards */
-    --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card: 40 15% 99%;
+    --card-foreground: 240 10% 10%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover: 40 15% 99%;
+    --popover-foreground: 240 10% 10%;
 
-    /* Vibrant Cyan Primary */
-    --primary: 190 95% 45%;
-    --primary-foreground: 0 0% 100%;
+    /* Electric Lime Primary */
+    --primary: 82 85% 45%;
+    --primary-foreground: 240 10% 5%;
 
-    /* Purple Secondary */
-    --secondary: 271 76% 53%;
+    /* Deep Indigo Secondary */
+    --secondary: 245 50% 50%;
     --secondary-foreground: 0 0% 100%;
 
-    /* Light Muted */
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
+    --muted: 40 10% 93%;
+    --muted-foreground: 240 5% 45%;
 
-    /* Pink Accent */
-    --accent: 330 81% 60%;
+    /* Warm Coral Accent */
+    --accent: 12 90% 62%;
     --accent-foreground: 0 0% 100%;
 
-    /* Success Green */
-    --success: 158 64% 52%;
+    --success: 158 64% 42%;
     --success-foreground: 0 0% 100%;
 
-    --destructive: 0 84% 60%;
+    --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    /* Light Borders */
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 190 95% 45%;
+    --border: 40 10% 88%;
+    --input: 40 10% 88%;
+    --ring: 82 85% 45%;
 
-    --radius: 1rem;
+    --radius: 0.75rem;
 
-    /* Gradient Auras */
-    --gradient-cyber: linear-gradient(135deg, hsl(190 95% 45%) 0%, hsl(271 76% 53%) 100%);
-    --gradient-quantum: linear-gradient(135deg, hsl(271 76% 53%) 0%, hsl(330 81% 60%) 100%);
-    --gradient-emerald: linear-gradient(135deg, hsl(158 64% 52%) 0%, hsl(190 95% 45%) 100%);
-    --gradient-holographic: linear-gradient(135deg, hsl(190 95% 45%) 0%, hsl(271 76% 53%) 50%, hsl(330 81% 60%) 100%);
-    
-    /* Light Glow Effects */
-    --glow-cyan: 0 0 20px hsla(190 95% 45% / 0.3), 0 0 40px hsla(190 95% 45% / 0.2);
-    --glow-purple: 0 0 20px hsla(271 76% 53% / 0.3), 0 0 40px hsla(271 76% 53% / 0.2);
-    --glow-pink: 0 0 20px hsla(330 81% 60% / 0.3), 0 0 40px hsla(330 81% 60% / 0.2);
-    
-    /* Animations */
-    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 82 85% 45%;
+    --sidebar-primary-foreground: 240 10% 5%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.3% 26.1%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 82 85% 45%;
   }
 
   .dark {
-    /* Futuristic Dark Theme - Space Navy Base */
-    --background: 222 47% 6%;
-    --foreground: 210 40% 98%;
+    /* Dark Mode — Ink Black + Electric Lime */
+    --background: 240 12% 6%;
+    --foreground: 40 20% 95%;
 
-    /* Glassmorphic Cards */
-    --card: 222 40% 10%;
-    --card-foreground: 210 40% 98%;
+    --card: 240 12% 9%;
+    --card-foreground: 40 20% 95%;
 
-    --popover: 222 45% 8%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 240 12% 8%;
+    --popover-foreground: 40 20% 95%;
 
-    /* Neon Cyan Primary */
-    --primary: 190 100% 50%;
-    --primary-foreground: 222 47% 6%;
+    /* Electric Lime Primary */
+    --primary: 82 90% 50%;
+    --primary-foreground: 240 12% 5%;
 
-    /* Cyber Purple Secondary */
-    --secondary: 271 81% 56%;
-    --secondary-foreground: 210 40% 98%;
+    /* Lavender Secondary */
+    --secondary: 260 60% 65%;
+    --secondary-foreground: 240 12% 5%;
 
-    /* Muted Glass */
-    --muted: 222 40% 15%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 240 12% 14%;
+    --muted-foreground: 240 5% 55%;
 
-    /* Quantum Pink Accent */
-    --accent: 330 81% 60%;
-    --accent-foreground: 210 40% 98%;
+    /* Warm Coral Accent */
+    --accent: 12 90% 62%;
+    --accent-foreground: 240 12% 5%;
 
-    /* Emerald Success */
-    --success: 158 64% 52%;
-    --success-foreground: 222 47% 6%;
+    --success: 158 64% 48%;
+    --success-foreground: 240 12% 5%;
 
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 40 20% 95%;
 
-    /* Glowing Borders */
-    --border: 222 40% 20%;
-    --input: 222 40% 15%;
-    --ring: 190 100% 50%;
+    --border: 240 12% 16%;
+    --input: 240 12% 14%;
+    --ring: 82 90% 50%;
 
-    /* Gradient Auras */
-    --gradient-cyber: linear-gradient(135deg, hsl(190 100% 50%) 0%, hsl(271 81% 56%) 100%);
-    --gradient-quantum: linear-gradient(135deg, hsl(271 81% 56%) 0%, hsl(330 81% 60%) 100%);
-    --gradient-emerald: linear-gradient(135deg, hsl(158 64% 52%) 0%, hsl(190 100% 50%) 100%);
-    --gradient-holographic: linear-gradient(135deg, hsl(190 100% 50%) 0%, hsl(271 81% 56%) 50%, hsl(330 81% 60%) 100%);
-    
-    /* Glow Effects */
-    --glow-cyan: 0 0 20px hsla(190 100% 50% / 0.5), 0 0 40px hsla(190 100% 50% / 0.3);
-    --glow-purple: 0 0 20px hsla(271 81% 56% / 0.5), 0 0 40px hsla(271 81% 56% / 0.3);
-    --glow-pink: 0 0 20px hsla(330 81% 60% / 0.5), 0 0 40px hsla(330 81% 60% / 0.3);
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 82 90% 50%;
+    --sidebar-primary-foreground: 240 12% 5%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 82 90% 50%;
   }
 }
 
@@ -121,185 +104,102 @@ All colors MUST be HSL.
   * {
     @apply border-border;
   }
-
   body {
-    @apply bg-background text-foreground overflow-x-hidden;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    @apply bg-background text-foreground overflow-x-hidden antialiased;
+    font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  code, pre, .font-mono {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
   }
 }
 
 @layer utilities {
-  /* Animations */
-  @keyframes pulse-subtle {
-    0%, 100% {
-      opacity: 1;
-      transform: scale(1);
-    }
-    50% {
-      opacity: 0.8;
-      transform: scale(1.05);
-    }
-  }
-
-  @keyframes gradient-shift {
-    0%, 100% {
-      background-position: 0% 50%;
-    }
-    50% {
-      background-position: 100% 50%;
-    }
-  }
-
-  .animate-pulse-subtle {
-    animation: pulse-subtle 2s ease-in-out infinite;
-  }
-
-  .animate-gradient {
-    background-size: 200% 200%;
-    animation: gradient-shift 3s ease infinite;
-  }
-
-  /* Glassmorphism - Light Mode */
+  /* Glassmorphism */
   .glass {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7));
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    @apply bg-card/60 backdrop-blur-xl border border-border/50;
+    box-shadow: 0 4px 24px -1px hsl(var(--foreground) / 0.04);
   }
-  
-  .glass-strong {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.85));
-    backdrop-filter: blur(30px);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-  }
-
-  /* Glassmorphism - Dark Mode */
   .dark .glass {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: none;
+    @apply bg-card/40;
+    box-shadow: 0 4px 24px -1px hsl(var(--primary) / 0.03);
   }
-  
+
+  .glass-strong {
+    @apply bg-card/80 backdrop-blur-2xl border border-border/60;
+    box-shadow: 0 8px 32px -4px hsl(var(--foreground) / 0.06);
+  }
   .dark .glass-strong {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.08));
-    backdrop-filter: blur(30px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: none;
+    @apply bg-card/60;
+    box-shadow: 0 8px 32px -4px hsl(var(--primary) / 0.05);
   }
 
-  /* Neuphemism - Light Mode */
-  .neu-flat {
-    background: hsl(var(--card));
-    box-shadow: 
-      8px 8px 16px rgba(0, 0, 0, 0.1),
-      -8px -8px 16px rgba(255, 255, 255, 0.9);
+  /* Glow */
+  .glow-primary {
+    box-shadow: 0 0 24px -4px hsl(var(--primary) / 0.4), 0 0 48px -8px hsl(var(--primary) / 0.2);
   }
-  
-  .neu-pressed {
-    box-shadow: 
-      inset 4px 4px 8px rgba(0, 0, 0, 0.1),
-      inset -4px -4px 8px rgba(255, 255, 255, 0.9);
+  .glow-cyan { /* keeping old class for compat */
+    box-shadow: 0 0 24px -4px hsl(var(--primary) / 0.4), 0 0 48px -8px hsl(var(--primary) / 0.2);
   }
-
-  /* Neuphemism - Dark Mode */
-  .dark .neu-flat {
-    background: hsl(var(--card));
-    box-shadow: 
-      8px 8px 16px rgba(0, 0, 0, 0.4),
-      -8px -8px 16px rgba(255, 255, 255, 0.05);
-  }
-  
-  .dark .neu-pressed {
-    box-shadow: 
-      inset 4px 4px 8px rgba(0, 0, 0, 0.5),
-      inset -4px -4px 8px rgba(255, 255, 255, 0.05);
-  }
-
-  /* Glow Effects */
-  .glow-cyan {
-    box-shadow: var(--glow-cyan);
-  }
-  
   .glow-purple {
-    box-shadow: var(--glow-purple);
+    box-shadow: 0 0 24px -4px hsl(var(--secondary) / 0.4);
   }
-  
   .glow-pink {
-    box-shadow: var(--glow-pink);
+    box-shadow: 0 0 24px -4px hsl(var(--accent) / 0.4);
   }
 
   /* Gradient Text */
   .gradient-text {
-    background: var(--gradient-holographic);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)));
   }
 
-  /* Floating Animation */
-  .float {
-    animation: float 6s ease-in-out infinite;
-  }
-  
+  /* Animations */
   @keyframes float {
-    0%, 100% { transform: translateY(0px) rotate(0deg); }
-    50% { transform: translateY(-20px) rotate(5deg); }
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-12px) rotate(2deg); }
   }
+  .float { animation: float 6s ease-in-out infinite; }
 
-  /* Pulse Glow */
-  .pulse-glow {
-    animation: pulse-glow 2s ease-in-out infinite;
-  }
-  
   @keyframes pulse-glow {
-    0%, 100% { box-shadow: 0 0 20px hsla(190 100% 50% / 0.5); }
-    50% { box-shadow: 0 0 40px hsla(190 100% 50% / 0.8), 0 0 60px hsla(271 81% 56% / 0.4); }
+    0%, 100% { box-shadow: 0 0 16px hsl(var(--primary) / 0.3); }
+    50% { box-shadow: 0 0 32px hsl(var(--primary) / 0.5), 0 0 48px hsl(var(--secondary) / 0.2); }
   }
+  .pulse-glow, .animate-pulse-glow { animation: pulse-glow 2.5s ease-in-out infinite; }
 
-  /* Shimmer Effect */
-  .shimmer {
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-    background-size: 200% 100%;
-    animation: shimmer 2s infinite;
-  }
-  
   @keyframes shimmer {
     0% { background-position: -200% 0; }
     100% { background-position: 200% 0; }
   }
-
-  /* Particle Background */
-  .particles {
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-    overflow: hidden;
-    pointer-events: none;
+  .shimmer {
+    background: linear-gradient(90deg, transparent, hsl(var(--primary) / 0.06), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 3s infinite;
   }
 
-  /* Christmas Theme - Only active on Dec 25 */
+  .animate-pulse-subtle {
+    animation: pulse-glow 2.5s ease-in-out infinite;
+  }
+
+  /* Christmas Theme */
   .christmas-glow {
     text-shadow: 
       0 0 10px hsl(0 70% 50% / 0.5),
-      0 0 20px hsl(140 60% 45% / 0.3),
-      0 0 30px hsl(0 70% 50% / 0.2);
+      0 0 20px hsl(140 60% 45% / 0.3);
     animation: christmas-pulse 2s ease-in-out infinite;
   }
-
   @keyframes christmas-pulse {
-    0%, 100% {
-      text-shadow: 
-        0 0 10px hsl(0 70% 50% / 0.5),
-        0 0 20px hsl(140 60% 45% / 0.3),
-        0 0 30px hsl(0 70% 50% / 0.2);
-    }
-    50% {
-      text-shadow: 
-        0 0 20px hsl(140 60% 45% / 0.6),
-        0 0 40px hsl(0 70% 50% / 0.4),
-        0 0 60px hsl(140 60% 45% / 0.3);
-    }
+    0%, 100% { text-shadow: 0 0 10px hsl(0 70% 50% / 0.5), 0 0 20px hsl(140 60% 45% / 0.3); }
+    50% { text-shadow: 0 0 20px hsl(140 60% 45% / 0.6), 0 0 40px hsl(0 70% 50% / 0.4); }
+  }
+
+  /* Noise texture overlay */
+  .noise::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0.03;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1;
   }
 }
