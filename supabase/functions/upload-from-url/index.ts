@@ -20,7 +20,18 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Fetch the remote file
+    // Fetch the remote file - HEAD first to check size
+    const headRes = await fetch(url, { method: 'HEAD' }).catch(() => null);
+    const contentLengthHeader = headRes?.headers.get('content-length');
+    
+    if (contentLengthHeader && parseInt(contentLengthHeader, 10) > 50 * 1024 * 1024) {
+      return new Response(JSON.stringify({ error: 'File exceeds 50MB limit for URL uploads' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Fetch the file
     const response = await fetch(url);
     if (!response.ok) {
       return new Response(JSON.stringify({ error: `Failed to fetch URL: ${response.status} ${response.statusText}` }), {
@@ -30,10 +41,9 @@ Deno.serve(async (req) => {
     }
 
     const contentType = response.headers.get('content-type') || 'application/octet-stream';
-    const contentLength = response.headers.get('content-length');
-    const fileSize = contentLength ? parseInt(contentLength, 10) : 0;
+    const actualLength = response.headers.get('content-length');
 
-    // Extract filename from URL or content-disposition
+    // Extract filename
     const contentDisposition = response.headers.get('content-disposition');
     let fileName = 'downloaded-file';
     if (contentDisposition) {
@@ -44,49 +54,62 @@ Deno.serve(async (req) => {
         const urlPath = new URL(url).pathname;
         const segments = urlPath.split('/').filter(Boolean);
         if (segments.length > 0) {
-          fileName = decodeURIComponent(segments[segments.length - 1]);
+          const lastSegment = decodeURIComponent(segments[segments.length - 1]);
+          if (lastSegment.includes('.')) fileName = lastSegment;
         }
       } catch { /* keep default */ }
     }
 
-    // Get file extension
-    const ext = fileName.includes('.') ? fileName.split('.').pop() : 'bin';
-    const storagePath = `${shortId}.${ext}`;
-
-    const fileData = await response.arrayBuffer();
-    const actualSize = fileData.byteLength;
-
-    // Check size limit (100MB)
-    if (actualSize > 100 * 1024 * 1024) {
-      return new Response(JSON.stringify({ error: 'File exceeds 100MB limit' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+    // Add extension from content-type if missing
+    if (!fileName.includes('.')) {
+      const extMap: Record<string, string> = {
+        'video/mp4': 'mp4', 'video/webm': 'webm', 'video/quicktime': 'mov',
+        'image/png': 'png', 'image/jpeg': 'jpg', 'image/gif': 'gif', 'image/webp': 'webp',
+        'application/pdf': 'pdf', 'application/zip': 'zip',
+        'audio/mpeg': 'mp3', 'audio/wav': 'wav',
+        'application/octet-stream': 'bin',
+      };
+      const ext = extMap[contentType.split(';')[0].trim()] || 'bin';
+      fileName = `${fileName}.${ext}`;
     }
 
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-    );
+    const ext = fileName.split('.').pop() || 'bin';
+    const storagePath = `${shortId}.${ext}`;
 
-    // Upload to storage
-    const { error: uploadError } = await supabase.storage
-      .from('uploads')
-      .upload(storagePath, fileData, {
-        contentType,
-        cacheControl: '3600',
-        upsert: false,
-      });
+    // Stream upload directly to Supabase Storage using REST API
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
-    if (uploadError) throw uploadError;
+    const storageUploadUrl = `${supabaseUrl}/storage/v1/object/uploads/${storagePath}`;
+
+    const uploadRes = await fetch(storageUploadUrl, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${serviceRoleKey}`,
+        'Content-Type': contentType,
+        'Cache-Control': 'max-age=3600',
+        'x-upsert': 'false',
+      },
+      body: response.body, // Stream directly - no buffering!
+    });
+
+    if (!uploadRes.ok) {
+      const errText = await uploadRes.text();
+      throw new Error(`Storage upload failed: ${uploadRes.status} ${errText}`);
+    }
+
+    // Determine file size
+    const fileSize = actualLength ? parseInt(actualLength, 10) : 0;
 
     // Create database record
+    const supabase = createClient(supabaseUrl, serviceRoleKey);
+
     const { data: uploadRecord, error: dbError } = await supabase
       .from('uploads')
       .insert({
         short_id: shortId,
         file_name: fileName,
-        file_size: actualSize,
+        file_size: fileSize,
         file_type: contentType,
         storage_path: storagePath,
         expire_at: expireAt,
