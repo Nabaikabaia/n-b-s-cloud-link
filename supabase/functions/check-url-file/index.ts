@@ -22,7 +22,12 @@ Deno.serve(async (req) => {
     let contentType = 'application/octet-stream';
     let fileName = 'file';
 
-    const headRes = await fetch(url, { method: 'HEAD' }).catch(() => null);
+    const fetchHeaders = {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      'Accept': '*/*',
+    };
+
+    const headRes = await fetch(url, { method: 'HEAD', headers: fetchHeaders }).catch(() => null);
     if (headRes?.ok) {
       const cl = headRes.headers.get('content-length');
       if (cl) contentLength = parseInt(cl, 10);
