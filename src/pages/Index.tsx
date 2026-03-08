@@ -32,6 +32,7 @@ const Index = () => {
   const [urlInput, setUrlInput] = useState('');
   const [urlFileInfo, setUrlFileInfo] = useState<{ fileSize: number | null; contentType: string; fileName: string } | null>(null);
   const [isCheckingUrl, setIsCheckingUrl] = useState(false);
+  const [copiedBaseUrl, setCopiedBaseUrl] = useState(false);
   
   const { uploads, uploadFile, uploadFromUrl, deleteUpload, getPublicUrl, isLoading } = useUploads();
   const { isChristmasDay } = useChristmasTheme();
