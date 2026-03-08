@@ -116,13 +116,16 @@ Deno.serve(async (req) => {
     if (contentDisposition) {
       const match = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
       if (match) fileName = match[1].replace(/['"]/g, '');
-    } else {
+    }
+    
+    if (fileName === 'downloaded-file') {
       try {
         const urlPath = new URL(url).pathname;
         const segments = urlPath.split('/').filter(Boolean);
         if (segments.length > 0) {
           const lastSegment = decodeURIComponent(segments[segments.length - 1]);
-          if (lastSegment.includes('.')) fileName = lastSegment;
+          // Use the last URL segment as filename, even without extension
+          fileName = lastSegment.replace(/[^\w\-. ]/g, '_') || fileName;
         }
       } catch {
         // ignore
