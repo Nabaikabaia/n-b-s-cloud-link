@@ -13,7 +13,7 @@ import UploadHistory from '@/components/UploadHistory';
 import SnowfallEffect from '@/components/SnowfallEffect';
 import ChristmasModal from '@/components/ChristmasModal';
 import { Button } from '@/components/ui/button';
-import { Zap, Shield, History, Sparkles, Check, ArrowUp } from 'lucide-react';
+import { Zap, Shield, History, Sparkles, Check, ArrowUp, Upload } from 'lucide-react';
 import crystalOrb from '@/assets/crystal-orb.png';
 import { useUploads } from '@/hooks/useUploads';
 import { useChristmasTheme } from '@/hooks/useChristmasTheme';
