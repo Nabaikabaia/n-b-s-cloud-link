@@ -42,7 +42,7 @@ const ApiDocs = () => {
   );
 
   const baseUrl = window.location.origin;
-  const functionsUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1`;
+  const apiUrl = `${baseUrl}/api`;
 
   const addTerminalLine = (type: 'input' | 'output' | 'error' | 'info', text: string) => {
     setTerminalHistory(prev => [...prev, { type, text }]);
