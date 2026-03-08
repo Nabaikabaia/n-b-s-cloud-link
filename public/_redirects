@@ -1,4 +1,5 @@
 # Proxy API routes to Supabase Edge Functions
+/api/upload           https://aqrmhkzrrmpljrtknrpi.supabase.co/functions/v1/upload-from-url  200
 /api/upload-from-url  https://aqrmhkzrrmpljrtknrpi.supabase.co/functions/v1/upload-from-url  200
 /api/check-url-file   https://aqrmhkzrrmpljrtknrpi.supabase.co/functions/v1/check-url-file   200
 

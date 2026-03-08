@@ -58,43 +58,26 @@ const ApiDocs = () => {
     const url = testUrl.trim();
     const name = testCustomName.trim() || null;
 
-    addTerminalLine('info', `$ Sending request to upload-from-url...`);
-    addTerminalLine('input', `POST ${apiUrl}/upload-from-url`);
-    addTerminalLine('input', `Body: { url: "${url}"${name ? `, customName: "${name}"` : ''} }`);
+    addTerminalLine('info', `$ Sending request to /api/upload...`);
+    addTerminalLine('input', `GET ${apiUrl}/upload?url=${encodeURIComponent(url)}${name ? `&customName=${name}` : ''}`);
 
     try {
-      // Check file first
-      addTerminalLine('info', '→ Checking file metadata...');
-      const { data: metaData, error: metaError } = await supabase.functions.invoke("check-url-file", {
-        body: { url },
-      });
-      if (metaError) throw new Error(metaError.message);
-      if (metaData?.error) throw new Error(metaData.error);
-
-      addTerminalLine('output', `✓ File: ${metaData?.fileName || 'unknown'} (${metaData?.contentType || 'unknown'}, ${metaData?.fileSize ? (metaData.fileSize / 1024 / 1024).toFixed(2) + ' MB' : 'unknown size'})`);
-
-      // Generate short ID
-      const { data: shortId, error: idError } = await supabase.rpc("generate_short_id");
-      if (idError) throw idError;
-      addTerminalLine('info', `→ Generated short ID: ${shortId}`);
-
-      // Upload
+      // Simple single request — server handles everything
       addTerminalLine('info', '→ Uploading file...');
-      const expireAt = new Date(Date.now() + 60 * 60 * 1000).toISOString();
       const { data, error } = await supabase.functions.invoke("upload-from-url", {
-        body: { url, shortId, expireAt, customName: name },
+        body: { url, customName: name },
       });
       if (error) throw new Error(error.message);
       if (data?.error) throw new Error(data.error);
 
-      const link = `${baseUrl}/${data.custom_name || data.short_id}`;
-      const fullJson = { upload: data, metadata: metaData, download_url: link };
+      const link = data.download_url || `${baseUrl}/${data.custom_name || data.short_id}`;
 
       addTerminalLine('output', `✓ Upload complete!`);
+      addTerminalLine('output', `→ File: ${data.file_name} (${data.file_type})`);
       addTerminalLine('output', `→ Download: ${link}`);
-      addTerminalLine('output', `→ Expires: ${new Date(data.expire_at).toLocaleString()}`);
+      if (data.expire_at) addTerminalLine('output', `→ Expires: ${new Date(data.expire_at).toLocaleString()}`);
 
-      setTestResult({ success: true, link, fileName: data.file_name, size: metaData?.fileSize, type: data.file_type, expires: data.expire_at, json: fullJson });
+      setTestResult({ success: true, link, fileName: data.file_name, size: data.file_size, type: data.file_type, expires: data.expire_at, json: data });
       toast.success("Upload successful!");
     } catch (err: any) {
       addTerminalLine('error', `✗ Error: ${err.message}`);
@@ -104,12 +87,11 @@ const ApiDocs = () => {
     }
   };
 
-  const buildBrowserUrl = (url: string, shortId?: string, customName?: string) => {
+  const buildBrowserUrl = (url: string, customName?: string) => {
     const params = new URLSearchParams();
     params.set("url", url);
-    if (shortId) params.set("shortId", shortId);
     if (customName) params.set("customName", customName);
-    return `${apiUrl}/upload-from-url?${params.toString()}`;
+    return `${apiUrl}/upload?${params.toString()}`;
   };
 
   return (
@@ -232,9 +214,9 @@ const ApiDocs = () => {
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Request URL</span>
                       <div className="flex gap-1.5">
-                        <CopyBtn id="live-req-url" text={buildBrowserUrl(testUrl.trim(), testCustomName.trim() || `test-${Date.now()}`, testCustomName.trim() || undefined)} label="Copy" />
+                        <CopyBtn id="live-req-url" text={buildBrowserUrl(testUrl.trim(), testCustomName.trim() || undefined)} label="Copy" />
                         <button
-                          onClick={() => window.open(buildBrowserUrl(testUrl.trim(), testCustomName.trim() || `test-${Date.now()}`, testCustomName.trim() || undefined), '_blank')}
+                          onClick={() => window.open(buildBrowserUrl(testUrl.trim(), testCustomName.trim() || undefined), '_blank')}
                           className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium bg-primary/10 text-primary hover:bg-primary/15 transition-colors"
                         >
                           <ExternalLink className="h-3 w-3" />
@@ -243,7 +225,7 @@ const ApiDocs = () => {
                       </div>
                     </div>
                     <code className="text-[10px] font-mono text-foreground/60 break-all block leading-relaxed">
-                      {buildBrowserUrl(testUrl.trim(), testCustomName.trim() || "<auto>", testCustomName.trim() || undefined)}
+                      {buildBrowserUrl(testUrl.trim(), testCustomName.trim() || undefined)}
                     </code>
                   </div>
                 )}
@@ -394,10 +376,10 @@ const ApiDocs = () => {
 
             {/* Upload from URL */}
             <Endpoint
-              method="POST"
-              path="/upload-from-url"
+              method="GET"
+              path="/api/upload"
               title="Upload from URL"
-              desc="Give us a link — we download and host it for you."
+              desc="Just pass a URL — we download, host it, and return a link. That's it."
             >
               <div className="flex items-center gap-2 text-[10px] text-muted-foreground bg-muted/20 rounded-lg p-2.5 border border-border/30 font-mono">
                 <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary font-semibold">URL</span>
@@ -409,29 +391,25 @@ const ApiDocs = () => {
                 <span className="px-1.5 py-0.5 rounded bg-success/10 text-success font-semibold">Link</span>
               </div>
 
-              <CodeBlock id="opt2" code={`curl -X POST ${apiUrl}/upload-from-url \\
-  -H "Content-Type: application/json" \\
-  -d '{
-    "url": "https://example.com/video.mp4",
-    "shortId": "MyFile123",
-    "customName": "cool-video",
-    "expireAt": "2026-04-01T00:00:00Z"
-  }'`} onCopy={copy} copied={copiedSection} />
+              <CodeBlock id="opt2" code={`# Simple — just paste in your browser:
+${apiUrl}/upload?url=https://example.com/video.mp4
+
+# With custom name:
+${apiUrl}/upload?url=https://example.com/video.mp4&customName=cool-video`} onCopy={copy} copied={copiedSection} />
 
               {/* Browser URL */}
               <div className="rounded-lg bg-muted/20 border border-border/30 p-3 space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Browser Test URL</span>
-                  <CopyBtn id="browser-url" text={buildBrowserUrl("https://example.com/video.mp4", "MyFile123", "cool-video")} label="Copy" />
+                  <CopyBtn id="browser-url" text={buildBrowserUrl("https://example.com/video.mp4", "cool-video")} label="Copy" />
                 </div>
                 <code className="text-[10px] font-mono text-foreground/50 break-all block leading-relaxed">
-                  {buildBrowserUrl("https://example.com/video.mp4", "MyFile123", "cool-video")}
+                  {buildBrowserUrl("https://example.com/video.mp4", "cool-video")}
                 </code>
               </div>
 
               <ParamTable params={[
                 { name: "url", required: true, desc: "Direct link to a downloadable file" },
-                { name: "shortId", required: true, desc: "Unique ID for this upload" },
                 { name: "customName", required: false, desc: "Custom name for download link" },
                 { name: "expireAt", required: false, desc: "Expiry date (ISO format)" },
               ]} />
@@ -484,59 +462,42 @@ const ApiDocs = () => {
 
               <TabsContent value="js" className="space-y-3">
                 <ExampleLabel>Upload from URL</ExampleLabel>
-                <CodeBlock id="js-url" code={`const res = await fetch("${apiUrl}/upload-from-url", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    url: "https://example.com/video.mp4",
-    shortId: "MyVid123",
-    customName: "cool-video",
-  }),
-});
+                <CodeBlock id="js-url" code={`// Simple GET — works in browser too
+const res = await fetch("${apiUrl}/upload?url=" + encodeURIComponent("https://example.com/video.mp4") + "&customName=cool-video");
 const data = await res.json();
-console.log("Download:", "${baseUrl}/" + (data.custom_name || data.short_id));`} onCopy={copy} copied={copiedSection} />
+console.log("Download:", data.download_url);`} onCopy={copy} copied={copiedSection} />
               </TabsContent>
 
               <TabsContent value="python" className="space-y-3">
                 <ExampleLabel>Upload from URL</ExampleLabel>
                 <CodeBlock id="py-url" code={`import requests
 
-res = requests.post(
-    "${apiUrl}/upload-from-url",
-    json={
+res = requests.get(
+    "${apiUrl}/upload",
+    params={
         "url": "https://example.com/video.mp4",
-        "shortId": "MyVid123",
         "customName": "cool-video",
     },
 )
 data = res.json()
-print("Download:", "${baseUrl}/" + (data.get("custom_name") or data["short_id"]))`} onCopy={copy} copied={copiedSection} />
+print("Download:", data["download_url"])`} onCopy={copy} copied={copiedSection} />
               </TabsContent>
 
               <TabsContent value="node" className="space-y-3">
                 <ExampleLabel>Upload from URL</ExampleLabel>
-                <CodeBlock id="node-url" code={`const res = await fetch("${apiUrl}/upload-from-url", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    url: "https://example.com/video.mp4",
-    shortId: "MyVid123",
-    customName: "cool-video",
-  }),
-});
+                <CodeBlock id="node-url" code={`const url = new URL("${apiUrl}/upload");
+url.searchParams.set("url", "https://example.com/video.mp4");
+url.searchParams.set("customName", "cool-video");
+
+const res = await fetch(url);
 const data = await res.json();
-console.log("Download:", "${baseUrl}/" + (data.custom_name || data.short_id));`} onCopy={copy} copied={copiedSection} />
+console.log("Download:", data.download_url);`} onCopy={copy} copied={copiedSection} />
               </TabsContent>
 
               <TabsContent value="curl" className="space-y-3">
                 <ExampleLabel>Upload from URL</ExampleLabel>
-                <CodeBlock id="curl-url" code={`curl -X POST ${apiUrl}/upload-from-url \\
-  -H "Content-Type: application/json" \\
-  -d '{
-    "url": "https://example.com/video.mp4",
-    "shortId": "MyVid123",
-    "customName": "cool-video"
-  }'`} onCopy={copy} copied={copiedSection} />
+                <CodeBlock id="curl-url" code={`# Just paste in terminal or browser:
+curl "${apiUrl}/upload?url=https%3A%2F%2Fexample.com%2Fvideo.mp4&customName=cool-video"`} onCopy={copy} copied={copiedSection} />
               </TabsContent>
             </Tabs>
           </div>

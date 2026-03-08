@@ -66,11 +66,21 @@ Deno.serve(async (req) => {
       customName = body.customName;
     }
 
-    if (!url || !shortId) {
-      return new Response(JSON.stringify({ error: 'url and shortId are required' }), {
+    if (!url) {
+      return new Response(JSON.stringify({ error: 'url is required' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
+    }
+
+    // Auto-generate shortId if not provided
+    if (!shortId) {
+      const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+      const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+      const sb = createClient(supabaseUrl, serviceRoleKey);
+      const { data: generatedId, error: idError } = await sb.rpc('generate_short_id');
+      if (idError) throw idError;
+      shortId = generatedId;
     }
 
     const response = await fetchRemoteFile(url);
@@ -192,7 +202,15 @@ Deno.serve(async (req) => {
 
     if (dbError) throw dbError;
 
-    return new Response(JSON.stringify(uploadRecord), {
+    // Build the download URL
+    const origin = req.headers.get('origin') || req.headers.get('referer')?.replace(/\/$/, '') || '';
+    const identifier = uploadRecord.custom_name || uploadRecord.short_id;
+    const downloadUrl = origin ? `${origin}/${identifier}` : `/${identifier}`;
+
+    return new Response(JSON.stringify({
+      ...uploadRecord,
+      download_url: downloadUrl,
+    }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
