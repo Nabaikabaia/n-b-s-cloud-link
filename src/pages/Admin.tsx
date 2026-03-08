@@ -297,6 +297,7 @@ const Admin = () => {
               <thead>
                 <tr className="border-b border-border/40">
                   <th className="text-left py-2 px-2 text-muted-foreground font-medium">Name</th>
+                  <th className="text-left py-2 px-2 text-muted-foreground font-medium">Link</th>
                   <th className="text-left py-2 px-2 text-muted-foreground font-medium hidden sm:table-cell">Size</th>
                   <th className="text-left py-2 px-2 text-muted-foreground font-medium hidden md:table-cell">Type</th>
                   <th className="text-left py-2 px-2 text-muted-foreground font-medium">Downloads</th>
@@ -307,14 +308,22 @@ const Admin = () => {
               <tbody>
                 {filteredUploads.map((u) => {
                   const expiry = getExpiryStatus(u.expire_at);
+                  const link = `${window.location.origin}/${u.custom_name || u.short_id}`;
                   return (
                     <tr key={u.id} className="border-b border-border/20 hover:bg-muted/10 transition-colors">
                       <td className="py-2.5 px-2">
-                        <div>
-                          {u.custom_name && <p className="font-medium text-primary truncate max-w-[200px]">{u.custom_name}</p>}
-                          <p className={`truncate max-w-[200px] ${u.custom_name ? "text-muted-foreground text-[10px]" : "text-foreground"}`}>{u.file_name}</p>
-                          <p className="text-[10px] text-muted-foreground/60 font-mono">{u.short_id}</p>
-                        </div>
+                        <p className="font-medium text-foreground truncate max-w-[180px]">{u.file_name}</p>
+                        <p className="text-[10px] text-muted-foreground/60 font-mono">{u.short_id}</p>
+                      </td>
+                      <td className="py-2.5 px-2">
+                        <a
+                          href={link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary hover:underline truncate max-w-[200px] block font-mono text-[11px]"
+                        >
+                          /{u.custom_name || u.short_id}
+                        </a>
                       </td>
                       <td className="py-2.5 px-2 text-muted-foreground hidden sm:table-cell">{formatSize(u.file_size)}</td>
                       <td className="py-2.5 px-2 text-muted-foreground hidden md:table-cell">{u.file_type}</td>
@@ -329,7 +338,7 @@ const Admin = () => {
                         <div className="flex gap-1 justify-end">
                           <Button
                             size="sm" variant="ghost"
-                            onClick={() => window.open(`${window.location.origin}/${u.custom_name || u.short_id}`, "_blank")}
+                            onClick={() => window.open(link, "_blank")}
                             className="h-7 w-7 p-0"
                           >
                             <ExternalLink className="w-3 h-3" />
@@ -348,7 +357,7 @@ const Admin = () => {
                 })}
                 {filteredUploads.length === 0 && (
                   <tr>
-                    <td colSpan={6} className="py-8 text-center text-muted-foreground text-xs">
+                    <td colSpan={7} className="py-8 text-center text-muted-foreground text-xs">
                       {searchQuery ? "No files match your search" : "No files uploaded yet"}
                     </td>
                   </tr>
