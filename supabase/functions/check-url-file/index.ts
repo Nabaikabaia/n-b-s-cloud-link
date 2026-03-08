@@ -63,13 +63,15 @@ Deno.serve(async (req) => {
       });
     }
 
-    const response = await getFileInfo(url);
+    const result = await getFileInfo(url);
+    const response = result.response;
 
     if (!response || !response.ok) {
+      console.error('All fetch strategies failed:', result.errors);
       const status = response?.status || 'unknown';
       const statusText = response?.statusText || 'Could not reach URL';
       return new Response(
-        JSON.stringify({ error: `Failed to fetch URL metadata: ${status} ${statusText}` }),
+        JSON.stringify({ error: `Failed to fetch URL metadata: ${status} ${statusText}`, details: result.errors }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
       );
     }
