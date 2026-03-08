@@ -42,7 +42,7 @@ const ApiDocs = () => {
   );
 
   const baseUrl = window.location.origin;
-  const functionsUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1`;
+  const apiUrl = `${baseUrl}/api`;
 
   const addTerminalLine = (type: 'input' | 'output' | 'error' | 'info', text: string) => {
     setTerminalHistory(prev => [...prev, { type, text }]);
@@ -59,7 +59,7 @@ const ApiDocs = () => {
     const name = testCustomName.trim() || null;
 
     addTerminalLine('info', `$ Sending request to upload-from-url...`);
-    addTerminalLine('input', `POST ${functionsUrl}/upload-from-url`);
+    addTerminalLine('input', `POST ${apiUrl}/upload-from-url`);
     addTerminalLine('input', `Body: { url: "${url}"${name ? `, customName: "${name}"` : ''} }`);
 
     try {
@@ -109,7 +109,7 @@ const ApiDocs = () => {
     params.set("url", url);
     if (shortId) params.set("shortId", shortId);
     if (customName) params.set("customName", customName);
-    return `${functionsUrl}/upload-from-url?${params.toString()}`;
+    return `${apiUrl}/upload-from-url?${params.toString()}`;
   };
 
   return (
@@ -165,10 +165,10 @@ const ApiDocs = () => {
               <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
               <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Base URL</span>
             </div>
-            <CopyBtn id="base-url" text={functionsUrl} label="Copy" />
+            <CopyBtn id="base-url" text={apiUrl} label="Copy" />
           </div>
           <div className="font-mono text-sm text-primary bg-muted/30 rounded-xl px-4 py-3 border border-border/40 break-all">
-            {functionsUrl}
+            {apiUrl}
           </div>
         </div>
 
@@ -409,7 +409,7 @@ const ApiDocs = () => {
                 <span className="px-1.5 py-0.5 rounded bg-success/10 text-success font-semibold">Link</span>
               </div>
 
-              <CodeBlock id="opt2" code={`curl -X POST ${functionsUrl}/upload-from-url \\
+              <CodeBlock id="opt2" code={`curl -X POST ${apiUrl}/upload-from-url \\
   -H "Content-Type: application/json" \\
   -d '{
     "url": "https://example.com/video.mp4",
@@ -444,7 +444,7 @@ const ApiDocs = () => {
               title="Check File Info"
               desc="Get file metadata before uploading."
             >
-              <CodeBlock id="check" code={`curl -X POST ${functionsUrl}/check-url-file \\
+              <CodeBlock id="check" code={`curl -X POST ${apiUrl}/check-url-file \\
   -H "Content-Type: application/json" \\
   -d '{"url": "https://example.com/video.mp4"}'`} onCopy={copy} copied={copiedSection} />
               <pre className="bg-muted/20 rounded-xl p-3 text-[10px] font-mono text-foreground/60 border border-border/30">{`{
@@ -484,7 +484,7 @@ const ApiDocs = () => {
 
               <TabsContent value="js" className="space-y-3">
                 <ExampleLabel>Upload from URL</ExampleLabel>
-                <CodeBlock id="js-url" code={`const res = await fetch("${functionsUrl}/upload-from-url", {
+                <CodeBlock id="js-url" code={`const res = await fetch("${apiUrl}/upload-from-url", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
@@ -502,7 +502,7 @@ console.log("Download:", "${baseUrl}/" + (data.custom_name || data.short_id));`}
                 <CodeBlock id="py-url" code={`import requests
 
 res = requests.post(
-    "${functionsUrl}/upload-from-url",
+    "${apiUrl}/upload-from-url",
     json={
         "url": "https://example.com/video.mp4",
         "shortId": "MyVid123",
@@ -515,7 +515,7 @@ print("Download:", "${baseUrl}/" + (data.get("custom_name") or data["short_id"])
 
               <TabsContent value="node" className="space-y-3">
                 <ExampleLabel>Upload from URL</ExampleLabel>
-                <CodeBlock id="node-url" code={`const res = await fetch("${functionsUrl}/upload-from-url", {
+                <CodeBlock id="node-url" code={`const res = await fetch("${apiUrl}/upload-from-url", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
@@ -530,7 +530,7 @@ console.log("Download:", "${baseUrl}/" + (data.custom_name || data.short_id));`}
 
               <TabsContent value="curl" className="space-y-3">
                 <ExampleLabel>Upload from URL</ExampleLabel>
-                <CodeBlock id="curl-url" code={`curl -X POST ${functionsUrl}/upload-from-url \\
+                <CodeBlock id="curl-url" code={`curl -X POST ${apiUrl}/upload-from-url \\
   -H "Content-Type: application/json" \\
   -d '{
     "url": "https://example.com/video.mp4",

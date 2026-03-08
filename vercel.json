@@ -3,6 +3,14 @@
   "outputDirectory": "dist",
   "rewrites": [
     {
+      "source": "/api/upload-from-url",
+      "destination": "https://aqrmhkzrrmpljrtknrpi.supabase.co/functions/v1/upload-from-url"
+    },
+    {
+      "source": "/api/check-url-file",
+      "destination": "https://aqrmhkzrrmpljrtknrpi.supabase.co/functions/v1/check-url-file"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

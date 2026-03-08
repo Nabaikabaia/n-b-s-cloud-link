@@ -1,3 +1,6 @@
-# Cloudflare Pages SPA redirect
-# Handle client-side routing - redirect all requests to index.html
+# Proxy API routes to Supabase Edge Functions
+/api/upload-from-url  https://aqrmhkzrrmpljrtknrpi.supabase.co/functions/v1/upload-from-url  200
+/api/check-url-file   https://aqrmhkzrrmpljrtknrpi.supabase.co/functions/v1/check-url-file   200
+
+# SPA fallback
 /*    /index.html   200
