@@ -515,7 +515,7 @@ print("Download:", "${baseUrl}/" + (data.get("custom_name") or data["short_id"])
 
               <TabsContent value="node" className="space-y-3">
                 <ExampleLabel>Upload from URL</ExampleLabel>
-                <CodeBlock id="node-url" code={`const res = await fetch("${functionsUrl}/upload-from-url", {
+                <CodeBlock id="node-url" code={`const res = await fetch("${apiUrl}/upload-from-url", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
