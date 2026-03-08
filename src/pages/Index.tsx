@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { Link2 } from 'lucide-react';
 import ParticleBackground from '@/components/ParticleBackground';
 import UploadZone from '@/components/UploadZone';
 import UploadProgress from '@/components/UploadProgress';
