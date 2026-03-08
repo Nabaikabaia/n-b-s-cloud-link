@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Link2 } from 'lucide-react';
 import ParticleBackground from '@/components/ParticleBackground';
@@ -13,7 +13,7 @@ import UploadHistory from '@/components/UploadHistory';
 import SnowfallEffect from '@/components/SnowfallEffect';
 import ChristmasModal from '@/components/ChristmasModal';
 import { Button } from '@/components/ui/button';
-import { Zap, Shield, History, Sparkles, Check, ArrowUp, Upload } from 'lucide-react';
+import { Zap, Shield, History, Sparkles, Check, ArrowUp, Upload, HardDrive, AlertTriangle, Loader2 } from 'lucide-react';
 import crystalOrb from '@/assets/crystal-orb.png';
 import { useUploads } from '@/hooks/useUploads';
 import { useChristmasTheme } from '@/hooks/useChristmasTheme';
@@ -30,6 +30,8 @@ const Index = () => {
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [uploadMode, setUploadMode] = useState<'file' | 'url'>('file');
   const [urlInput, setUrlInput] = useState('');
+  const [urlFileInfo, setUrlFileInfo] = useState<{ fileSize: number | null; contentType: string; fileName: string } | null>(null);
+  const [isCheckingUrl, setIsCheckingUrl] = useState(false);
   
   const { uploads, uploadFile, uploadFromUrl, deleteUpload, getPublicUrl, isLoading } = useUploads();
   const { isChristmasDay } = useChristmasTheme();
@@ -42,6 +44,34 @@ const Index = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Check URL file info with debounce
+  useEffect(() => {
+    setUrlFileInfo(null);
+    if (!urlInput.trim() || uploadMode !== 'url') return;
+    
+    try { new URL(urlInput.trim()); } catch { return; }
+
+    setIsCheckingUrl(true);
+    const timer = setTimeout(async () => {
+      try {
+        const { supabase } = await import('@/integrations/supabase/client');
+        const { data, error } = await supabase
+          .functions.invoke('check-url-file', { body: { url: urlInput.trim() } });
+        if (!error && data) setUrlFileInfo(data);
+      } catch { /* ignore */ }
+      setIsCheckingUrl(false);
+    }, 600);
+
+    return () => { clearTimeout(timer); setIsCheckingUrl(false); };
+  }, [urlInput, uploadMode]);
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes >= 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+    if (bytes >= 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+    if (bytes >= 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${bytes} B`;
+  };
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -98,6 +128,7 @@ const Index = () => {
     setFilePreviewUrl('');
     setCustomName('');
     setUrlInput('');
+    setUrlFileInfo(null);
     setUploadMode('file');
   };
 
@@ -221,6 +252,37 @@ const Index = () => {
                     className="w-full px-4 py-3 rounded-lg glass border border-primary/30 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all text-foreground placeholder:text-muted-foreground"
                   />
 
+                  {/* File info display */}
+                  {isCheckingUrl && (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground animate-fade-in">
+                      <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                      Checking file info...
+                    </div>
+                  )}
+                  {urlFileInfo && !isCheckingUrl && (
+                    <div className="glass rounded-xl p-4 border border-primary/20 space-y-2 animate-fade-in">
+                      <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+                        <HardDrive className="h-4 w-4 text-primary" />
+                        File Details
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 text-sm">
+                        <div className="text-muted-foreground">Name:</div>
+                        <div className="text-foreground truncate font-medium">{urlFileInfo.fileName}</div>
+                        <div className="text-muted-foreground">Size:</div>
+                        <div className="text-foreground font-medium">
+                          {urlFileInfo.fileSize ? formatFileSize(urlFileInfo.fileSize) : 'Unknown'}
+                        </div>
+                        <div className="text-muted-foreground">Type:</div>
+                        <div className="text-foreground font-medium">{urlFileInfo.contentType}</div>
+                      </div>
+                      {urlFileInfo.fileSize && urlFileInfo.fileSize > 50 * 1024 * 1024 && (
+                        <div className="flex items-center gap-2 text-xs text-destructive mt-2">
+                          <AlertTriangle className="h-3.5 w-3.5" />
+                          Large file — will auto-expire after 1 hour
+                        </div>
+                      )}
+                    </div>
+                  )}
                   <div className="glass-strong rounded-xl p-4 sm:p-6 space-y-3 border border-primary/20 transition-all hover:border-primary/40">
                     <label htmlFor="url-custom-name" className="text-sm font-semibold text-foreground flex items-center gap-2">
                       <Sparkles className="h-4 w-4 text-accent" />
