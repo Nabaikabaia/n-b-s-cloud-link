@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Link2 } from 'lucide-react';
 import ParticleBackground from '@/components/ParticleBackground';
