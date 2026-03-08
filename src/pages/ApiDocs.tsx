@@ -57,7 +57,8 @@ const ApiDocs = () => {
       if (data?.error) throw new Error(data.error);
 
       const link = `${baseUrl}/${data.custom_name || data.short_id}`;
-      setTestResult({ success: true, link, fileName: data.file_name, size: metaData?.fileSize, type: data.file_type, expires: data.expire_at });
+      const fullJson = { upload: data, metadata: metaData, download_url: link };
+      setTestResult({ success: true, link, fileName: data.file_name, size: metaData?.fileSize, type: data.file_type, expires: data.expire_at, json: fullJson });
       toast.success("Upload successful!");
     } catch (err: any) {
       setTestResult({ success: false, error: err.message });
