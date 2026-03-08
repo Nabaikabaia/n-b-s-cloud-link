@@ -20,14 +20,17 @@ const browserHeaders = (url: string, withReferer = false) => {
 
 // Try multiple strategies to get file metadata without downloading the whole file
 async function getFileInfo(url: string) {
+  const errors: string[] = [];
+
   // Strategy 1: HEAD request (cheapest)
   for (const withReferer of [false, true]) {
     const res = await fetch(url, {
       method: 'HEAD',
       headers: browserHeaders(url, withReferer),
       redirect: 'follow',
-    }).catch(() => null);
-    if (res && res.ok) return res;
+    }).catch((e) => { errors.push(`HEAD(ref=${withReferer}): ${e.message}`); return null; });
+    if (res && res.ok) return { response: res, errors };
+    if (res) { errors.push(`HEAD(ref=${withReferer}): ${res.status} ${res.statusText}`); }
     res?.body?.cancel();
   }
 
@@ -37,12 +40,13 @@ async function getFileInfo(url: string) {
       method: 'GET',
       headers: browserHeaders(url, withReferer),
       redirect: 'follow',
-    }).catch(() => null);
-    if (res && res.ok) return res;
+    }).catch((e) => { errors.push(`GET(ref=${withReferer}): ${e.message}`); return null; });
+    if (res && res.ok) return { response: res, errors };
+    if (res) { errors.push(`GET(ref=${withReferer}): ${res.status} ${res.statusText}`); }
     res?.body?.cancel();
   }
 
-  return null;
+  return { response: null, errors };
 }
 
 Deno.serve(async (req) => {
