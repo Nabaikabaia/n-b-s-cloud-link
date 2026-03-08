@@ -165,10 +165,10 @@ const ApiDocs = () => {
               <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
               <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Base URL</span>
             </div>
-            <CopyBtn id="base-url" text={functionsUrl} label="Copy" />
+            <CopyBtn id="base-url" text={apiUrl} label="Copy" />
           </div>
           <div className="font-mono text-sm text-primary bg-muted/30 rounded-xl px-4 py-3 border border-border/40 break-all">
-            {functionsUrl}
+            {apiUrl}
           </div>
         </div>
 
