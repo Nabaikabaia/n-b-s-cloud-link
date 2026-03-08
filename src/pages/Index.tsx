@@ -45,6 +45,34 @@ const Index = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Check URL file info with debounce
+  useEffect(() => {
+    setUrlFileInfo(null);
+    if (!urlInput.trim() || uploadMode !== 'url') return;
+    
+    try { new URL(urlInput.trim()); } catch { return; }
+
+    setIsCheckingUrl(true);
+    const timer = setTimeout(async () => {
+      try {
+        const { supabase } = await import('@/integrations/supabase/client');
+        const { data, error } = await supabase
+          .functions.invoke('check-url-file', { body: { url: urlInput.trim() } });
+        if (!error && data) setUrlFileInfo(data);
+      } catch { /* ignore */ }
+      setIsCheckingUrl(false);
+    }, 600);
+
+    return () => { clearTimeout(timer); setIsCheckingUrl(false); };
+  }, [urlInput, uploadMode]);
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes >= 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+    if (bytes >= 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+    if (bytes >= 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${bytes} B`;
+  };
+
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
