@@ -172,9 +172,113 @@ const Index = () => {
 
         {/* Main upload area */}
         <div className="max-w-4xl mx-auto space-y-6 sm:space-y-8">
-          {!selectedFile && !currentUpload && (
-            <div className="animate-fade-in">
+          {!selectedFile && !currentUpload && uploadMode === 'file' && !isUploading && (
+            <div className="animate-fade-in space-y-4">
+              {/* Mode toggle */}
+              <div className="flex items-center justify-center gap-2">
+                <Button
+                  variant={uploadMode === 'file' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setUploadMode('file')}
+                  className="transition-all"
+                >
+                  <Upload className="w-4 h-4 mr-1" />
+                  From Device
+                </Button>
+                <Button
+                  variant={uploadMode === 'url' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setUploadMode('url')}
+                  className="transition-all"
+                >
+                  <Link2 className="w-4 h-4 mr-1" />
+                  From URL
+                </Button>
+              </div>
               <UploadZone onFileSelect={handleFileSelect} isUploading={false} />
+            </div>
+          )}
+
+          {!selectedFile && !currentUpload && uploadMode === 'url' && !isUploading && (
+            <div className="animate-fade-in space-y-4">
+              {/* Mode toggle */}
+              <div className="flex items-center justify-center gap-2">
+                <Button
+                  variant={uploadMode === 'file' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setUploadMode('file')}
+                  className="transition-all"
+                >
+                  <Upload className="w-4 h-4 mr-1" />
+                  From Device
+                </Button>
+                <Button
+                  variant={uploadMode === 'url' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setUploadMode('url')}
+                  className="transition-all"
+                >
+                  <Link2 className="w-4 h-4 mr-1" />
+                  From URL
+                </Button>
+              </div>
+
+              <div className="glass-strong rounded-3xl p-8 sm:p-12 border-2 border-border space-y-6">
+                <div className="text-center space-y-2">
+                  <div className="relative mx-auto w-fit">
+                    <div className="absolute inset-0 rounded-full bg-primary/20 blur-2xl animate-pulse-glow" />
+                    <div className="relative p-6 sm:p-8 rounded-full glass border border-primary/50">
+                      <Link2 size={40} className="sm:w-12 sm:h-12 text-primary" />
+                    </div>
+                  </div>
+                  <h3 className="text-xl sm:text-2xl font-bold gradient-text mt-4">Paste a URL</h3>
+                  <p className="text-muted-foreground text-sm sm:text-base">
+                    Enter a direct link to any file on the web
+                  </p>
+                </div>
+
+                <input
+                  type="url"
+                  value={urlInput}
+                  onChange={(e) => setUrlInput(e.target.value)}
+                  placeholder="https://example.com/file.pdf"
+                  className="w-full px-4 py-3 rounded-lg glass border border-primary/30 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all text-foreground placeholder:text-muted-foreground"
+                />
+
+                <div className="glass-strong rounded-xl p-4 sm:p-6 space-y-3 border border-primary/20 transition-all hover:border-primary/40">
+                  <label htmlFor="url-custom-name" className="text-sm font-semibold text-foreground flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-accent" />
+                    Custom Link Name (Optional)
+                  </label>
+                  <input
+                    id="url-custom-name"
+                    type="text"
+                    value={customName}
+                    onChange={(e) => setCustomName(e.target.value)}
+                    placeholder="e.g., My Awesome Document"
+                    className="w-full px-4 py-3 rounded-lg glass border border-primary/30 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all text-foreground placeholder:text-muted-foreground"
+                    maxLength={100}
+                  />
+                  {customName && (
+                    <p className="text-xs text-muted-foreground flex items-center gap-1 animate-fade-in">
+                      <Check className="h-3 w-3 text-success" />
+                      Your link will display: <span className="font-semibold text-primary">"{customName}"</span>
+                    </p>
+                  )}
+                </div>
+
+                <ExpirationSelector selected={expiration} onChange={setExpiration} />
+
+                <Button
+                  onClick={handleUrlUpload}
+                  disabled={!urlInput.trim()}
+                  className="w-full py-5 sm:py-6 text-base sm:text-lg glass-strong border-2 border-primary hover:glow-cyan group relative overflow-hidden transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-secondary/20 to-accent/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+                  <Link2 className="w-5 h-5 mr-2" />
+                  Fetch & Upload
+                </Button>
+              </div>
             </div>
           )}
 
