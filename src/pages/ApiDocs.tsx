@@ -210,7 +210,130 @@ const ApiDocs = () => {
             </CardContent>
           </Card>
 
-          {/* ===== SECTION 4: Try It ===== */}
+          {/* ===== SECTION 4: Code Examples ===== */}
+          <Card className="glass-panel border-primary/20">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Braces className="h-5 w-5 text-primary" />
+                Code Examples
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">Copy-paste examples in your favorite language.</p>
+            </CardHeader>
+            <CardContent>
+              <Tabs defaultValue="js" className="space-y-3">
+                <TabsList className="bg-muted/70">
+                  <TabsTrigger value="js" className="text-xs">JavaScript</TabsTrigger>
+                  <TabsTrigger value="python" className="text-xs">Python</TabsTrigger>
+                  <TabsTrigger value="node" className="text-xs">Node.js</TabsTrigger>
+                  <TabsTrigger value="curl" className="text-xs">cURL</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="js" className="space-y-4">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Upload a file (browser)</p>
+                  <CodeBlock id="js-file" label="" onCopy={copy} copied={copiedSection} code={`const formData = new FormData();
+formData.append("file", fileInput.files[0]);
+formData.append("expiration", "24h");
+formData.append("customName", "my-photo");
+
+const res = await fetch("${baseUrl}/api/upload", {
+  method: "POST",
+  body: formData,
+});
+const data = await res.json();
+console.log("Download link:", data.url);`} />
+
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Upload from URL</p>
+                  <CodeBlock id="js-url" label="" onCopy={copy} copied={copiedSection} code={`const res = await fetch("${functionsUrl}/upload-from-url", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    url: "https://example.com/video.mp4",
+    shortId: "MyVid123",
+    customName: "cool-video",
+    expireAt: "2026-04-01T00:00:00Z",
+  }),
+});
+const data = await res.json();
+console.log("Download link:", "${baseUrl}/" + (data.custom_name || data.short_id));`} />
+                </TabsContent>
+
+                <TabsContent value="python" className="space-y-4">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Upload a file</p>
+                  <CodeBlock id="py-file" label="" onCopy={copy} copied={copiedSection} code={`import requests
+
+files = {"file": open("photo.jpg", "rb")}
+data = {"expiration": "24h", "customName": "my-photo"}
+
+res = requests.post("${baseUrl}/api/upload", files=files, data=data)
+print("Download link:", res.json()["url"])`} />
+
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Upload from URL</p>
+                  <CodeBlock id="py-url" label="" onCopy={copy} copied={copiedSection} code={`import requests
+
+res = requests.post(
+    "${functionsUrl}/upload-from-url",
+    json={
+        "url": "https://example.com/video.mp4",
+        "shortId": "MyVid123",
+        "customName": "cool-video",
+        "expireAt": "2026-04-01T00:00:00Z",
+    },
+)
+data = res.json()
+print("Download link:", "${baseUrl}/" + (data.get("custom_name") or data["short_id"]))`} />
+                </TabsContent>
+
+                <TabsContent value="node" className="space-y-4">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Upload a file (Node.js)</p>
+                  <CodeBlock id="node-file" label="" onCopy={copy} copied={copiedSection} code={`import fs from "fs";
+
+const formData = new FormData();
+formData.append("file", new Blob([fs.readFileSync("./photo.jpg")]), "photo.jpg");
+formData.append("expiration", "24h");
+formData.append("customName", "my-photo");
+
+const res = await fetch("${baseUrl}/api/upload", {
+  method: "POST",
+  body: formData,
+});
+const data = await res.json();
+console.log("Download link:", data.url);`} />
+
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Upload from URL</p>
+                  <CodeBlock id="node-url" label="" onCopy={copy} copied={copiedSection} code={`const res = await fetch("${functionsUrl}/upload-from-url", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    url: "https://example.com/video.mp4",
+    shortId: "MyVid123",
+    customName: "cool-video",
+  }),
+});
+const data = await res.json();
+console.log("Download link:", "${baseUrl}/" + (data.custom_name || data.short_id));`} />
+                </TabsContent>
+
+                <TabsContent value="curl" className="space-y-4">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Upload a file</p>
+                  <CodeBlock id="curl-file" label="" onCopy={copy} copied={copiedSection} code={`curl -X POST ${baseUrl}/api/upload \\
+  -F "file=@./photo.jpg" \\
+  -F "expiration=24h" \\
+  -F "customName=my-photo"`} />
+
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Upload from URL</p>
+                  <CodeBlock id="curl-url" label="" onCopy={copy} copied={copiedSection} code={`curl -X POST ${functionsUrl}/upload-from-url \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "url": "https://example.com/video.mp4",
+    "shortId": "MyVid123",
+    "customName": "cool-video"
+  }'`} />
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
+
+          {/* ===== SECTION 5: Try It ===== */}
           <Card className="glass-panel border-primary/20 border-2">
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-lg">
