@@ -24,8 +24,8 @@ Deno.serve(async (req) => {
     const headRes = await fetch(url, { method: 'HEAD' }).catch(() => null);
     const contentLengthHeader = headRes?.headers.get('content-length');
     
-    if (contentLengthHeader && parseInt(contentLengthHeader, 10) > 50 * 1024 * 1024) {
-      return new Response(JSON.stringify({ error: 'File exceeds 50MB limit for URL uploads' }), {
+    if (contentLengthHeader && parseInt(contentLengthHeader, 10) > 200 * 1024 * 1024) {
+      return new Response(JSON.stringify({ error: 'File exceeds 200MB limit for URL uploads' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
