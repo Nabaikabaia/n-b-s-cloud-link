@@ -28,17 +28,17 @@ async function getFileInfo(url: string) {
       redirect: 'follow',
     }).catch(() => null);
     if (res && res.ok) return res;
+    res?.body?.cancel();
   }
 
-  // Strategy 2: GET request (cancel body immediately after reading headers)
-  for (const withReferer of [false, true]) {
+  // Strategy 2: GET request with referer (most compatible)
+  for (const withReferer of [true, false]) {
     const res = await fetch(url, {
       method: 'GET',
       headers: browserHeaders(url, withReferer),
       redirect: 'follow',
     }).catch(() => null);
     if (res && res.ok) return res;
-    if (res && res.status !== 403) return res; // non-403 error, return as-is
     res?.body?.cancel();
   }
 
