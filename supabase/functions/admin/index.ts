@@ -106,25 +106,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    if (action === 'delete') {
-      const body = await req.json();
-      const { id, storagePath } = body;
-
-      if (storagePath) {
-        await supabase.storage.from('uploads').remove([storagePath]);
-      }
-      const { error } = await supabase.from('uploads').delete().eq('id', id);
-      if (error) throw error;
-
-      return new Response(JSON.stringify({ success: true }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
     }
-
-    return new Response(JSON.stringify({ error: 'Unknown action' }), {
-      status: 400,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
   } catch (error) {
     console.error('Admin error:', error);
     return new Response(JSON.stringify({ error: error instanceof Error ? error.message : 'Internal error' }), {
