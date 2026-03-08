@@ -59,7 +59,7 @@ const ApiDocs = () => {
     const name = testCustomName.trim() || null;
 
     addTerminalLine('info', `$ Sending request to upload-from-url...`);
-    addTerminalLine('input', `POST ${functionsUrl}/upload-from-url`);
+    addTerminalLine('input', `POST ${apiUrl}/upload-from-url`);
     addTerminalLine('input', `Body: { url: "${url}"${name ? `, customName: "${name}"` : ''} }`);
 
     try {
