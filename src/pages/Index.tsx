@@ -276,7 +276,7 @@ const Index = () => {
                         <div className="text-foreground font-medium">{urlFileInfo.contentType}</div>
                       </div>
                       {urlFileInfo.fileSize && urlFileInfo.fileSize > 50 * 1024 * 1024 && (
-                        <div className="flex items-center gap-2 text-xs text-amber-400 mt-2">
+                        <div className="flex items-center gap-2 text-xs text-destructive mt-2">
                           <AlertTriangle className="h-3.5 w-3.5" />
                           Large file — will auto-expire after 1 hour
                         </div>
