@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { Upload, File, Image, FileArchive, FileText, Zap } from 'lucide-react';
+import { Upload, CloudUpload } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface UploadZoneProps {
@@ -24,15 +24,10 @@ const UploadZone = ({ onFileSelect, isUploading }: UploadZoneProps) => {
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
-
     const file = e.dataTransfer.files[0];
     if (file) {
       if (file.size > 100 * 1024 * 1024) {
-        toast({
-          title: "File too large",
-          description: "Maximum file size is 100MB",
-          variant: "destructive",
-        });
+        toast({ title: "File too large", description: "Maximum file size is 100MB", variant: "destructive" });
         return;
       }
       onFileSelect(file);
@@ -43,11 +38,7 @@ const UploadZone = ({ onFileSelect, isUploading }: UploadZoneProps) => {
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 100 * 1024 * 1024) {
-        toast({
-          title: "File too large",
-          description: "Maximum file size is 100MB",
-          variant: "destructive",
-        });
+        toast({ title: "File too large", description: "Maximum file size is 100MB", variant: "destructive" });
         return;
       }
       onFileSelect(file);
@@ -60,60 +51,43 @@ const UploadZone = ({ onFileSelect, isUploading }: UploadZoneProps) => {
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
       className={`
-        relative overflow-hidden rounded-3xl p-8 sm:p-12 transition-all duration-300 cursor-pointer
-        glass-strong border-2 group
-        ${isDragging 
-          ? 'border-primary glow-cyan scale-[1.02]' 
-          : 'border-border hover:border-primary/50 hover:scale-[1.01]'
+        relative overflow-hidden rounded-2xl p-10 sm:p-16 transition-all duration-300 cursor-pointer group
+        border-2 border-dashed
+        ${isDragging
+          ? 'border-primary bg-primary/5 scale-[1.01]'
+          : 'border-border hover:border-primary/50 bg-card/30 hover:bg-card/50'
         }
         ${isUploading ? 'opacity-50 pointer-events-none' : ''}
       `}
     >
-      {/* Animated gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-secondary/5 to-accent/5 opacity-50 group-hover:opacity-80 transition-opacity" />
-      
-      {/* Floating icons - hidden on mobile for cleaner look */}
-      <div className="hidden sm:block absolute top-8 left-8 text-primary/30 animate-float">
-        <File size={32} />
-      </div>
-      <div className="hidden sm:block absolute top-12 right-12 text-secondary/30 animate-float" style={{ animationDelay: '1s' }}>
-        <Image size={28} />
-      </div>
-      <div className="hidden sm:block absolute bottom-12 left-16 text-accent/30 animate-float" style={{ animationDelay: '2s' }}>
-        <FileArchive size={24} />
-      </div>
-      <div className="hidden sm:block absolute bottom-16 right-8 text-success/30 animate-float" style={{ animationDelay: '1.5s' }}>
-        <FileText size={26} />
-      </div>
-
-      <div className="relative z-10 flex flex-col items-center justify-center space-y-4 sm:space-y-6">
-        <div className="relative">
-          <div className="absolute inset-0 rounded-full bg-primary/20 blur-2xl animate-pulse-glow" />
-          <div className={`relative p-6 sm:p-8 rounded-full glass border border-primary/50 transition-all duration-300 ${isDragging ? 'glow-cyan scale-110' : 'group-hover:glow-cyan group-hover:scale-105'}`}>
-            <Upload size={40} className="sm:w-12 sm:h-12 text-primary" />
-          </div>
+      <div className="relative z-10 flex flex-col items-center justify-center space-y-5">
+        <div className={`p-5 rounded-2xl transition-all duration-300 ${
+          isDragging ? 'bg-primary/10 scale-110' : 'bg-muted/60 group-hover:bg-primary/5 group-hover:scale-105'
+        }`}>
+          <CloudUpload size={44} className="text-primary" />
         </div>
 
         <div className="text-center space-y-2">
-          <h3 className="text-xl sm:text-2xl font-bold gradient-text">
-            {isDragging ? 'Drop it here!' : 'Drop Your File Here'}
+          <h3 className="text-xl sm:text-2xl font-semibold text-foreground">
+            {isDragging ? 'Drop it here' : 'Drop your file here'}
           </h3>
-          <p className="text-muted-foreground text-sm sm:text-base">
-            or <span className="text-primary font-medium underline underline-offset-2">click to browse</span>
-          </p>
-          <p className="text-xs text-muted-foreground flex items-center justify-center gap-1 mt-2">
-            <Zap size={12} className="text-primary" />
-            Quantum Upload Engine v2.0 • Max 100MB
+          <p className="text-muted-foreground text-sm">
+            or <span className="text-primary font-medium cursor-pointer hover:underline">browse files</span>
           </p>
         </div>
 
-        <input
-          type="file"
-          onChange={handleFileInput}
-          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-          disabled={isUploading}
-        />
+        <div className="flex items-center gap-3 text-xs text-muted-foreground">
+          <span className="px-2.5 py-1 rounded-full bg-muted/80">Max 100MB</span>
+          <span className="px-2.5 py-1 rounded-full bg-muted/80">Any file type</span>
+        </div>
       </div>
+
+      <input
+        type="file"
+        onChange={handleFileInput}
+        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+        disabled={isUploading}
+      />
     </div>
   );
 };

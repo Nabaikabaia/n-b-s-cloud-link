@@ -9,47 +9,40 @@ const FilePreview = ({ file, previewUrl }: FilePreviewProps) => {
   const fileType = file.type.split('/')[0];
 
   const getFileIcon = () => {
-    if (fileType === 'image') {
-      return <ImageIcon className="w-8 h-8 text-primary" />;
-    } else if (fileType === 'video') {
-      return <FileVideo className="w-8 h-8 text-secondary" />;
-    } else if (fileType === 'audio') {
-      return <FileAudio className="w-8 h-8 text-accent" />;
-    } else if (file.type.includes('pdf')) {
-      return <FileText className="w-8 h-8 text-success" />;
-    } else if (file.type.includes('zip') || file.type.includes('rar')) {
-      return <FileArchive className="w-8 h-8 text-warning" />;
-    } else {
-      return <FileIcon className="w-8 h-8 text-muted-foreground" />;
-    }
+    const iconClass = "w-7 h-7";
+    if (fileType === 'image') return <ImageIcon className={`${iconClass} text-primary`} />;
+    if (fileType === 'video') return <FileVideo className={`${iconClass} text-secondary`} />;
+    if (fileType === 'audio') return <FileAudio className={`${iconClass} text-accent`} />;
+    if (file.type.includes('pdf')) return <FileText className={`${iconClass} text-success`} />;
+    if (file.type.includes('zip') || file.type.includes('rar')) return <FileArchive className={`${iconClass} text-accent`} />;
+    return <FileIcon className={`${iconClass} text-muted-foreground`} />;
   };
 
   const formatFileSize = (bytes: number) => {
     if (bytes < 1024) return bytes + ' B';
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
     return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
   };
 
   return (
-    <div className="glass-strong rounded-2xl p-4 sm:p-6 border border-primary/30 transition-all hover:border-primary/50">
-      <div className="flex items-start gap-3 sm:gap-4">
+    <div className="rounded-2xl bg-card border border-border p-4 sm:p-5 transition-colors hover:border-primary/30">
+      <div className="flex items-center gap-4">
         {fileType === 'image' && previewUrl ? (
-          <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden border border-primary/50 glow-cyan shrink-0">
+          <div className="w-14 h-14 rounded-xl overflow-hidden border border-border shrink-0">
             <img src={previewUrl} alt={file.name} className="w-full h-full object-cover" />
           </div>
         ) : (
-          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg glass border border-primary/50 flex items-center justify-center shrink-0">
+          <div className="w-14 h-14 rounded-xl bg-muted/60 border border-border flex items-center justify-center shrink-0">
             {getFileIcon()}
           </div>
         )}
         
         <div className="flex-1 min-w-0">
-          <p className="text-xs sm:text-sm text-muted-foreground">Selected file</p>
-          <p className="text-base sm:text-lg font-semibold truncate">{file.name}</p>
-          <div className="flex items-center gap-2 sm:gap-3 mt-1 sm:mt-2 text-xs sm:text-sm text-muted-foreground">
+          <p className="text-sm font-medium text-foreground truncate">{file.name}</p>
+          <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
             <span>{formatFileSize(file.size)}</span>
-            <span>•</span>
-            <span className="truncate">{file.type || 'Unknown type'}</span>
+            <span className="w-1 h-1 rounded-full bg-border" />
+            <span className="truncate">{file.type || 'Unknown'}</span>
           </div>
         </div>
       </div>
