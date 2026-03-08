@@ -77,12 +77,28 @@ const Index = () => {
     }
   };
 
+  const handleUrlUpload = async () => {
+    if (!urlInput.trim()) return;
+
+    setIsUploading(true);
+    try {
+      const upload = await uploadFromUrl(urlInput.trim(), expiration, customName.trim() || undefined);
+      setCurrentUpload(upload);
+    } catch (error) {
+      console.error('URL upload failed:', error);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const handleReset = () => {
     setSelectedFile(null);
     setCurrentUpload(null);
     setIsUploading(false);
     setFilePreviewUrl('');
     setCustomName('');
+    setUrlInput('');
+    setUploadMode('file');
   };
 
   return (
