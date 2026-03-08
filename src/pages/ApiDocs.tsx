@@ -530,7 +530,7 @@ console.log("Download:", "${baseUrl}/" + (data.custom_name || data.short_id));`}
 
               <TabsContent value="curl" className="space-y-3">
                 <ExampleLabel>Upload from URL</ExampleLabel>
-                <CodeBlock id="curl-url" code={`curl -X POST ${functionsUrl}/upload-from-url \\
+                <CodeBlock id="curl-url" code={`curl -X POST ${apiUrl}/upload-from-url \\
   -H "Content-Type: application/json" \\
   -d '{
     "url": "https://example.com/video.mp4",
