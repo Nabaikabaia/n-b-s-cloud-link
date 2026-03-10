@@ -52,7 +52,7 @@ const UploadHistory = ({ uploads, onDelete, getPublicUrl }: UploadHistoryProps) 
       <div className="space-y-2">
         {displayedUploads.map((upload) => {
           const expiryStatus = getExpiryStatus(upload.expire_at);
-          const url = getPublicUrl(upload.short_id, upload.custom_name);
+          const url = getPublicUrl(upload.short_id, upload.custom_name, upload.file_name);
 
           return (
             <div key={upload.id} className={`rounded-xl p-3 sm:p-4 border transition-colors ${
