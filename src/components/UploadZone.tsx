@@ -51,18 +51,18 @@ const UploadZone = ({ onFileSelect, isUploading }: UploadZoneProps) => {
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
       className={`
-        relative overflow-hidden rounded-2xl p-10 sm:p-16 transition-all duration-300 cursor-pointer group
+        relative overflow-hidden rounded-2xl p-10 sm:p-16 transition-all duration-300
         border-2 border-dashed
         ${isDragging
           ? 'border-primary bg-primary/5 scale-[1.01]'
-          : 'border-border hover:border-primary/50 bg-card/30 hover:bg-card/50'
+          : 'border-border bg-card/30'
         }
         ${isUploading ? 'opacity-50 pointer-events-none' : ''}
       `}
     >
       <div className="relative z-10 flex flex-col items-center justify-center space-y-5">
         <div className={`p-5 rounded-2xl transition-all duration-300 ${
-          isDragging ? 'bg-primary/10 scale-110' : 'bg-muted/60 group-hover:bg-primary/5 group-hover:scale-105'
+          isDragging ? 'bg-primary/10 scale-110' : 'bg-muted/60'
         }`}>
           <CloudUpload size={44} className="text-primary" />
         </div>
@@ -72,9 +72,17 @@ const UploadZone = ({ onFileSelect, isUploading }: UploadZoneProps) => {
             {isDragging ? 'Drop it here' : 'Drop your file here'}
           </h3>
           <p className="text-muted-foreground text-sm">
-            or <span className="text-primary font-medium cursor-pointer hover:underline">browse files</span>
+            or tap the button below
           </p>
         </div>
+
+        <label
+          htmlFor="file-upload-input"
+          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-sm sm:text-base cursor-pointer hover:bg-primary/90 active:scale-95 transition-all shadow-md select-none touch-manipulation"
+        >
+          <Upload size={18} />
+          Browse Files
+        </label>
 
         <div className="flex items-center gap-3 text-xs text-muted-foreground">
           <span className="px-2.5 py-1 rounded-full bg-muted/80">Max 100MB</span>
@@ -83,9 +91,10 @@ const UploadZone = ({ onFileSelect, isUploading }: UploadZoneProps) => {
       </div>
 
       <input
+        id="file-upload-input"
         type="file"
         onChange={handleFileInput}
-        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+        className="sr-only"
         disabled={isUploading}
       />
     </div>
