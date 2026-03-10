@@ -8,7 +8,7 @@ import { formatDistanceToNow } from 'date-fns';
 interface UploadHistoryProps {
   uploads: Upload[];
   onDelete: (upload: Upload) => void;
-  getPublicUrl: (shortId: string, customName?: string | null) => string;
+  getPublicUrl: (shortId: string, customName?: string | null, fileName?: string) => string;
 }
 
 const UploadHistory = ({ uploads, onDelete, getPublicUrl }: UploadHistoryProps) => {
