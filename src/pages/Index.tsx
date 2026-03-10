@@ -225,7 +225,7 @@ const Index = () => {
                     <div className="flex items-center gap-2 rounded-xl bg-muted/30 border border-border px-4 py-2.5 animate-fade-in">
                       <span className="text-xs text-muted-foreground shrink-0">Link preview:</span>
                       <code className="text-xs font-mono text-primary truncate flex-1">
-                        {`${window.location.origin}/${customName || '<id>'}`}
+                        {`${window.location.origin}/${customName || '<id>'}${urlFileInfo?.fileName ? '.' + urlFileInfo.fileName.split('.').pop()?.toLowerCase() : ''}`}
                       </code>
                       <button
                         onClick={() => {
