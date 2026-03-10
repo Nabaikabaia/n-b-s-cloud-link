@@ -21,7 +21,7 @@ const HamburgerMenu = () => {
   const menuItems = [
     { label: "Home", icon: Home, onClick: () => navigate("/"), isActive: location.pathname === "/" },
     { label: "API Docs", icon: FileText, onClick: () => navigate("/api-docs"), isActive: location.pathname === "/api-docs" },
-    { label: "My Projects", icon: Briefcase, href: "https://nabees-projects.vercel.app", external: true },
+    { label: "My Projects", icon: Briefcase, href: "https://nabees.online", external: true },
   ];
 
   return (
