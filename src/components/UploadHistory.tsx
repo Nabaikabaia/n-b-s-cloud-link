@@ -31,7 +31,7 @@ const UploadHistory = ({ uploads, onDelete, getPublicUrl }: UploadHistoryProps) 
   };
 
   const handleCopy = (upload: Upload) => {
-    const url = getPublicUrl(upload.short_id, upload.custom_name);
+    const url = getPublicUrl(upload.short_id, upload.custom_name, upload.file_name);
     navigator.clipboard.writeText(url);
     toast({ title: "Copied!", description: "Link copied to clipboard" });
   };
