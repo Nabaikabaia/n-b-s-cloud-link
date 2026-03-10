@@ -308,7 +308,9 @@ const Admin = () => {
               <tbody>
                 {filteredUploads.map((u) => {
                   const expiry = getExpiryStatus(u.expire_at);
-                  const link = `${window.location.origin}/${u.custom_name || u.short_id}`;
+                  const ext = u.file_name?.split('.').pop()?.toLowerCase();
+                  const baseId = u.custom_name || u.short_id;
+                  const link = `${window.location.origin}/${baseId}${ext && !baseId.includes('.') ? '.' + ext : ''}`;
                   return (
                     <tr key={u.id} className="border-b border-border/20 hover:bg-muted/10 transition-colors">
                       <td className="py-2.5 px-2">

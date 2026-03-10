@@ -225,7 +225,7 @@ const Index = () => {
                     <div className="flex items-center gap-2 rounded-xl bg-muted/30 border border-border px-4 py-2.5 animate-fade-in">
                       <span className="text-xs text-muted-foreground shrink-0">Link preview:</span>
                       <code className="text-xs font-mono text-primary truncate flex-1">
-                        {`${window.location.origin}/${customName || '<id>'}`}
+                        {`${window.location.origin}/${customName || '<id>'}${urlFileInfo?.fileName ? '.' + urlFileInfo.fileName.split('.').pop()?.toLowerCase() : ''}`}
                       </code>
                       <button
                         onClick={() => {
@@ -289,7 +289,7 @@ const Index = () => {
                     {customName && (
                       <p className="text-xs text-muted-foreground flex items-center gap-1">
                         <Check className="h-3 w-3 text-success" />
-                        Link: <span className="font-medium text-primary">{window.location.origin}/{customName}</span>
+                        Link: <span className="font-medium text-primary">{window.location.origin}/{customName}{urlFileInfo?.fileName ? '.' + urlFileInfo.fileName.split('.').pop()?.toLowerCase() : ''}</span>
                       </p>
                     )}
                   </div>
@@ -337,7 +337,7 @@ const Index = () => {
                 {customName && (
                   <p className="text-xs text-muted-foreground flex items-center gap-1">
                     <Check className="h-3 w-3 text-success" />
-                    Link: <span className="font-medium text-primary">{window.location.origin}/{customName}</span>
+                    Link: <span className="font-medium text-primary">{window.location.origin}/{customName}{selectedFile ? '.' + selectedFile.name.split('.').pop()?.toLowerCase() : ''}</span>
                   </p>
                 )}
               </div>
@@ -365,7 +365,7 @@ const Index = () => {
           {currentUpload && (
             <div className="space-y-4 animate-fade-in">
               <URLCard
-                url={getPublicUrl(currentUpload.short_id, currentUpload.custom_name)}
+                url={getPublicUrl(currentUpload.short_id, currentUpload.custom_name, currentUpload.file_name)}
                 fileName={currentUpload.file_name}
                 customName={currentUpload.custom_name}
               />
