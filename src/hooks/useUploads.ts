@@ -193,9 +193,11 @@ export const useUploads = () => {
     }
   };
 
-  const getPublicUrl = (shortId: string, customName?: string | null): string => {
+  const getPublicUrl = (shortId: string, customName?: string | null, fileName?: string): string => {
     const identifier = customName || shortId;
-    return `${window.location.origin}/${identifier}`;
+    const ext = fileName?.split('.').pop()?.toLowerCase();
+    const suffix = ext && !identifier.includes('.') ? `.${ext}` : '';
+    return `${window.location.origin}/${identifier}${suffix}`;
   };
 
   useEffect(() => {

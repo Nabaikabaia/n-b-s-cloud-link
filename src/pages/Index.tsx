@@ -337,7 +337,7 @@ const Index = () => {
                 {customName && (
                   <p className="text-xs text-muted-foreground flex items-center gap-1">
                     <Check className="h-3 w-3 text-success" />
-                    Link: <span className="font-medium text-primary">{window.location.origin}/{customName}</span>
+                    Link: <span className="font-medium text-primary">{window.location.origin}/{customName}{selectedFile ? '.' + selectedFile.name.split('.').pop()?.toLowerCase() : ''}</span>
                   </p>
                 )}
               </div>

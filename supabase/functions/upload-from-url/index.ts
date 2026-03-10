@@ -210,7 +210,9 @@ Deno.serve(async (req) => {
     const referer = req.headers.get('referer');
     const origin = rawOrigin || (referer ? new URL(referer).origin : '');
     const identifier = uploadRecord.custom_name || uploadRecord.short_id;
-    const downloadUrl = origin ? `${origin}/${identifier}` : `/${identifier}`;
+    const fileExt = fileName.split('.').pop()?.toLowerCase() || '';
+    const extSuffix = fileExt && !identifier.includes('.') ? `.${fileExt}` : '';
+    const downloadUrl = origin ? `${origin}/${identifier}${extSuffix}` : `/${identifier}${extSuffix}`;
 
     return new Response(JSON.stringify({
       ...uploadRecord,

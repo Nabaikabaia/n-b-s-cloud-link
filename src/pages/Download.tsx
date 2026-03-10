@@ -24,21 +24,45 @@ const Download = () => {
     setError('');
     
     try {
-      // Try to find by short_id first
+      // Strip file extension from identifier for lookup
+      const cleanId = identifier.replace(/\.[^.]+$/, '');
+      
+      // Try to find by short_id first (with and without extension)
       let { data, error: fetchError } = await supabase
         .from('uploads')
         .select('*')
-        .eq('short_id', identifier)
+        .eq('short_id', cleanId)
         .maybeSingle();
 
-      // If not found by short_id, try custom_name
+      // If not found, try with original identifier as short_id
+      if (!data && cleanId !== identifier) {
+        const result = await supabase
+          .from('uploads')
+          .select('*')
+          .eq('short_id', identifier)
+          .maybeSingle();
+        data = result.data;
+        fetchError = result.error;
+      }
+
+      // Try custom_name (stripped)
       if (!data) {
+        const result = await supabase
+          .from('uploads')
+          .select('*')
+          .eq('custom_name', cleanId)
+          .maybeSingle();
+        data = result.data;
+        fetchError = result.error;
+      }
+
+      // Try custom_name (original)
+      if (!data && cleanId !== identifier) {
         const result = await supabase
           .from('uploads')
           .select('*')
           .eq('custom_name', identifier)
           .maybeSingle();
-        
         data = result.data;
         fetchError = result.error;
       }
