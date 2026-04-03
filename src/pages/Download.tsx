@@ -1,98 +1,56 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
+import { useParams } from 'react-router-dom';
 
 const Download = () => {
   const { identifier } = useParams<{ identifier: string }>();
-  const navigate = useNavigate();
   const [error, setError] = useState('');
 
   useEffect(() => {
     if (!identifier) {
-      navigate('/');
+      window.location.replace('/');
       return;
     }
 
-    const resolve = async () => {
-      try {
-        const cleanId = identifier.replace(/\.[^.]+$/, '');
-
-        // Try short_id (cleaned), short_id (original), custom_name (cleaned), custom_name (original)
-        let data: any = null;
-        for (const [col, val] of [
-          ['short_id', cleanId],
-          ['short_id', identifier],
-          ['custom_name', cleanId],
-          ['custom_name', identifier],
-        ] as const) {
-          if (data) break;
-          const res = await supabase.from('uploads').select('*').eq(col, val).maybeSingle();
-          if (res.data) data = res.data;
-        }
-
-        if (!data) {
-          setError('File not found.');
-          return;
-        }
-
-        if (data.expire_at && new Date(data.expire_at) < new Date()) {
-          setError('This file has expired.');
-          return;
-        }
-
-        // Increment download count (fire and forget)
-        supabase.from('uploads').update({ download_count: (data.download_count || 0) + 1 }).eq('id', data.id).then();
-
-        const { data: urlData } = supabase.storage.from('uploads').getPublicUrl(data.storage_path);
-        const publicUrl = urlData.publicUrl;
-
-        const ext = data.file_name.split('.').pop()?.toLowerCase() || '';
-        const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp', 'ico'];
-        const videoExts = ['mp4', 'webm', 'mov', 'ogg'];
-        const audioExts = ['mp3', 'wav', 'ogg', 'flac', 'm4a', 'aac'];
-
-        if (imageExts.includes(ext) || videoExts.includes(ext) || audioExts.includes(ext)) {
-          // Redirect to the raw file – browser will render/play it natively
-          window.location.replace(publicUrl);
-        } else {
-          // Force download for other file types
-          const response = await fetch(publicUrl);
-          const blob = await response.blob();
-          const blobUrl = window.URL.createObjectURL(blob);
-          const link = document.createElement('a');
-          link.href = blobUrl;
-          link.download = data.custom_name || data.file_name;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          window.URL.revokeObjectURL(blobUrl);
-          setError('Download started. You can close this page.');
-        }
-      } catch (err) {
-        console.error(err);
+    // Redirect immediately to the edge function which handles resolution and serves the file directly
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    const serveUrl = `${supabaseUrl}/functions/v1/serve-file/${encodeURIComponent(identifier)}`;
+    
+    // Use fetch to check for errors first, then redirect for media or let download happen
+    fetch(serveUrl, { method: 'HEAD', redirect: 'manual' }).then(res => {
+      if (res.status === 302) {
+        // Media file - redirect to the Location header
+        // Since we can't read Location from opaque redirects, just navigate directly
+        window.location.replace(serveUrl);
+      } else if (res.status === 200) {
+        // Download file - navigate to trigger download
+        window.location.replace(serveUrl);
+      } else if (res.status === 404) {
         setError('File not found.');
+      } else if (res.status === 410) {
+        setError('This file has expired.');
+      } else {
+        // Just try navigating anyway
+        window.location.replace(serveUrl);
       }
-    };
-
-    resolve();
-  }, [identifier, navigate]);
+    }).catch(() => {
+      // On any network error, just try direct navigation
+      window.location.replace(serveUrl);
+    });
+  }, [identifier]);
 
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background text-foreground">
         <div className="text-center space-y-4">
           <p className="text-xl">{error}</p>
-          <button onClick={() => navigate('/')} className="text-primary underline">Go Home</button>
+          <a href="/" className="text-primary underline">Go Home</a>
         </div>
       </div>
     );
   }
 
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-background text-foreground">
-      <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
-    </div>
-  );
+  // Minimal loading - this shows very briefly before redirect
+  return null;
 };
 
 export default Download;
